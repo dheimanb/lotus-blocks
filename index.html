@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lotus Blocks — 試手 v0.1.2</title>
+<title>Lotus Blocks — 試手 v0.1.3</title>
 <style>
   :root{
     --ink:#2e3a34; --sage:#476b5d; --sage-d:#38564b; --petal:#d96c8a; --petal-soft:#f7e0e8;
@@ -43,13 +43,16 @@
   #board{display:grid;grid-template-columns:repeat(9,var(--cell));grid-template-rows:repeat(9,var(--cell));background:var(--sage-d);gap:1px;padding:3px;border-radius:8px;touch-action:none}
   .cell{background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*.52);position:relative;user-select:none}
   .cell.br{margin-right:2px}.cell.bb{margin-bottom:2px}
-  .cell.given{background:var(--sage);color:#fff;font-weight:700}
+  /* v0.1.3 起：定版唔用綠——用參考色階最深嘅海老色做錨，綠色退返去版面外（盤框／頁面）。 */
+  .cell.given{background:#80323B;color:#fff;font-weight:700}
   .cell.placed{background:var(--petal-soft);color:var(--ink);font-weight:600;cursor:grab}
   .cell.conflict{background:var(--bad)!important;color:#fff!important}
   /* v0.1.2 配色層：預覽改行 overlay，唔再換底色——格本身嘅身份（定版綠／已放粉紅）全程保留，
      預覽只係上面加一層：可放＝藍綠色環＋薄染；有問題＝紅斜紋＋紅環。 */
   .cell.pv-ok{background-image:linear-gradient(rgba(31,122,141,.20),rgba(31,122,141,.20));box-shadow:inset 0 0 0 3px rgba(31,122,141,.9)}
   .cell.pv-bad{background-image:repeating-linear-gradient(45deg,rgba(229,72,77,.5) 0 4px,rgba(229,72,77,0) 4px 9px);box-shadow:inset 0 0 0 2px var(--bad)}
+  /* 深紅定版格上面紅斜紋會沉，改用白紋白環先睇得清 */
+  .cell.given.pv-bad{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 4px,rgba(255,255,255,0) 4px 9px);box-shadow:inset 0 0 0 2px #fff}
   .cell.hint-flash{animation:hintflash .5s ease-in-out 6 alternate}
   @keyframes hintflash{from{box-shadow:inset 0 0 0 3px var(--petal)}to{box-shadow:inset 0 0 0 3px #ffd166}}
   /* ---------- tray ---------- */
@@ -89,7 +92,7 @@
 <div class="wrap">
   <header class="top">
     <h1>Lotus Blocks</h1>
-    <div class="sub">試 手 v0.1.2 · PLAYTEST</div>
+    <div class="sub">試 手 v0.1.3 · PLAYTEST</div>
   </header>
 
   <!-- ======== MENU ======== -->
@@ -128,7 +131,7 @@
     <div id="tray"></div>
   </section>
 
-  <footer>Lotus Blocks 試手 v0.1.2 — 驗證手感用，唔係完成品。<br>完成一盤之後，撳「複製本場成績」貼返去實行計劃頁記錄。</footer>
+  <footer>Lotus Blocks 試手 v0.1.3 — 驗證手感用，唔係完成品。<br>完成一盤之後，撳「複製本場成績」貼返去實行計劃頁記錄。</footer>
 </div>
 
 <!-- ======== PAUSE ======== -->
@@ -368,7 +371,7 @@ function checkWin(){
   showOv("doneOv");
 }
 function resultText(){
-  return `Lotus Blocks 試手 v0.1.2｜難度：${DIFF_LABEL[G.diff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜提示：${G.hints}｜限時：${G.timerOn ? "有" : "冇"}`;
+  return `Lotus Blocks 試手 v0.1.3｜難度：${DIFF_LABEL[G.diff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜提示：${G.hints}｜限時：${G.timerOn ? "有" : "冇"}`;
 }
 </script>
 
