@@ -474,8 +474,10 @@ function updatePreview(x, y){
   d.hover = a;
   const occ = occupancy();
   const ok = new Set(), bad = new Set();
+  let overlap = false;
   for(const s of p.shape){
     const r = a.r + s.dr, c = a.c + s.dc, k = r+","+c;
+    if(occ.has(k)){ bad.add(k); overlap = true; continue; }
     let clash = false;
     const scan = [];
     for(let i=0;i<9;i++){ scan.push(r+","+i); scan.push(i+","+c); }
@@ -488,6 +490,7 @@ function updatePreview(x, y){
     }
     (clash ? bad : ok).add(k);
   }
+  d.hoverInvalid = overlap;
   G.preview = {ok, bad};
   renderBoard();
 }
@@ -506,7 +509,7 @@ function endDrag(commit){
   const p = d.piece;
   $("ghost").style.display = "none";
   G.drag = null; G.preview = null; p.dragging = false;
-  if(commit && d.hover){
+  if(commit && d.hover && !d.hoverInvalid){
     const sameSpot = d.prevAt && d.hover.r===d.prevAt.r && d.hover.c===d.prevAt.c;
     p.at = {r:d.hover.r, c:d.hover.c}; p.placed = true;
     renderAll();
