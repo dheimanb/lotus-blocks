@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lotus Blocks — 試手 v0.1.3</title>
+<title>Lotus Blocks — 試手 v0.2</title>
 <style>
   :root{
     --ink:#2e3a34; --sage:#476b5d; --sage-d:#38564b; --petal:#d96c8a; --petal-soft:#f7e0e8;
@@ -43,8 +43,9 @@
   #board{display:grid;grid-template-columns:repeat(9,var(--cell));grid-template-rows:repeat(9,var(--cell));background:var(--sage-d);gap:1px;padding:3px;border-radius:8px;touch-action:none}
   .cell{background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*.52);position:relative;user-select:none}
   .cell.br{margin-right:2px}.cell.bb{margin-bottom:2px}
-  /* v0.1.3 起：定版唔用綠——用參考色階最深嘅海老色做錨，綠色退返去版面外（盤框／頁面）。 */
-  .cell.given{background:#80323B;color:#fff;font-weight:700}
+  /* v0.1.3 起：定版唔用綠——用參考色階做錨，綠色退返去版面外（盤框／頁面）。
+     v0.2：按 heiman 拍板改用鄰近嘅暗紅色 #BA7880，減低同方塊嘅色差衝突。 */
+  .cell.given{background:#BA7880;color:#fff;font-weight:700}
   .cell.placed{background:var(--petal-soft);color:var(--ink);font-weight:600;cursor:grab}
   .cell.conflict{background:var(--bad)!important;color:#fff!important}
   /* v0.1.2 配色層：預覽改行 overlay，唔再換底色——格本身嘅身份（定版綠／已放粉紅）全程保留，
@@ -85,6 +86,12 @@
   .bloom .core{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-9px 0 0 -11px;background:#ffd166;border-radius:50%;opacity:0;animation:bloomin .6s .55s ease forwards}
   @keyframes bloomin{from{opacity:0;transform:rotate(var(--rot)) scale(.25)}to{opacity:1;transform:rotate(var(--rot)) scale(1)}}
   .hidden{display:none!important}
+  .seed-modes{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .seed-chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:.92rem;cursor:pointer;color:var(--ink)}
+  .seed-chip.sel{border-color:var(--petal);background:var(--petal-soft)}
+  .seed-input{width:100%;margin-top:10px;border:2px solid var(--line);border-radius:10px;padding:10px 12px;font-size:1rem;background:#fff;color:var(--ink)}
+  #toast{display:none;margin-top:10px;background:#fdf3e3;border:1px solid #e5c07b;color:#6b5518;border-radius:10px;padding:9px 12px;font-size:.9rem;line-height:1.55}
+  #toast.show{display:block}
   footer{margin-top:16px;text-align:center;color:#8aa396;font-size:.78rem;line-height:1.7}
 </style>
 </head>
@@ -92,13 +99,21 @@
 <div class="wrap">
   <header class="top">
     <h1>Lotus Blocks</h1>
-    <div class="sub">試 手 v0.1.3 · PLAYTEST</div>
+    <div class="sub">試 手 v0.2 · PLAYTEST</div>
   </header>
 
   <!-- ======== MENU ======== -->
   <section id="menu" class="card">
-    <p style="line-height:1.7">一盤完整數獨解答切成一整套方塊，將所有方塊放返入 9×9，令每一行、每一列、每一宮都係 1–9 唔重複，就算完成。灰綠色係<b>定版件</b>（鎖死，唔使理）；粉紅色方塊喺下面件盤，拖上去放。</p>
+    <p style="line-height:1.7">一盤完整數獨解答切成一整套方塊，將所有方塊放返入 9×9，令每一行、每一列、每一宮都係 1–9 唔重複，就算完成。深紅色係<b>定版件</b>（鎖死，唔使理）；粉紅色方塊喺下面件盤，拖上去放。每一盤都係由種子即時生成——同一個種子，永遠同一盤。</p>
     <div id="diffList"></div>
+    <div class="seed-modes">
+      <button class="seed-chip" data-mode="daily">📅 每日盤</button>
+      <button class="seed-chip" data-mode="random">🎲 隨機</button>
+      <button class="seed-chip" data-mode="custom">✍️ 自訂種子</button>
+      <button class="seed-chip" data-mode="classic">🌸 經典三盤</button>
+    </div>
+    <input id="seedInput" class="seed-input hidden" placeholder="輸入種子，例如 LB-X-1（同種子＝同盤）">
+    <p class="note" id="seedNote"></p>
     <label class="timer-row">
       <input type="checkbox" id="timerChk">
       <div>
@@ -107,7 +122,7 @@
       </div>
     </label>
     <button class="start-btn" id="startBtn">開始</button>
-    <p class="note">試手版：廣告位係假掣，會扮播 1 秒廣告。放錯唔會即刻趕你走——撞數嘅格會標紅，鬆手嗰刻有撞數先計一次試錯，上限 3 次，之後可以睇廣告復活（每局最多 2 次）。</p>
+    <p class="note">試手版：廣告位係假掣，會扮播 1 秒廣告。拖住方塊嗰陣會預覽撞數，但係有限次數（簡單 8 次、普通／困難 5 次，以放件計），用完可以睇廣告 +3（每局最多買 2 次）。放錯唔會即刻趕你走——撞數嘅格會標紅，鬆手嗰刻有撞數先計一次試錯，上限 3 次，之後可以睇廣告復活（每局最多 2 次；買預覽同復活分開計）。</p>
   </section>
 
   <!-- ======== GAME ======== -->
@@ -118,20 +133,22 @@
         <span class="chip">種子 <b id="hudSeed">—</b></span>
         <span class="chip" id="hudTime">⏱ <b>00:00</b></span>
         <span class="chip err" id="hudErr">試錯 <b>0</b>/3</span>
+        <span class="chip" id="hudPv">撞數預覽 <b>0</b></span>
       </div>
       <div class="grp">
-        <button class="hbtn" id="hintBtn">💡 提示（廣告）</button>
+        <button class="hbtn" id="pvBtn">👁 預覽 +3（廣告）</button>
         <button class="hbtn" id="pauseBtn">⏸ 暫停</button>
         <button class="hbtn" id="restartBtn">↺ 重開</button>
         <button class="hbtn" id="homeBtn">主頁</button>
       </div>
     </div>
+    <div id="toast"></div>
     <div class="board-wrap"><div id="board"></div></div>
     <div class="tray-title">件 盤（拖方塊上盤；已放嘅方塊撳住可以拎返起）</div>
     <div id="tray"></div>
   </section>
 
-  <footer>Lotus Blocks 試手 v0.1.3 — 驗證手感用，唔係完成品。<br>完成一盤之後，撳「複製本場成績」貼返去實行計劃頁記錄。</footer>
+  <footer>Lotus Blocks 試手 v0.2 — 驗證手感用，唔係完成品。<br>完成一盤之後，撳「複製本場成績」貼返去實行計劃頁記錄。</footer>
 </div>
 
 <!-- ======== PAUSE ======== -->
@@ -179,9 +196,16 @@
 
 <div id="ghost"></div>
 
+<script src="generator.js"></script>
 <script>
 const BOARDS = [{"seed": "LB-E-20261023", "difficulty": "easy", "solution": [5, 2, 8, 6, 1, 7, 9, 4, 3, 3, 6, 1, 4, 8, 9, 2, 5, 7, 4, 9, 7, 5, 3, 2, 8, 6, 1, 9, 5, 4, 7, 6, 3, 1, 8, 2, 8, 7, 6, 1, 2, 5, 4, 3, 9, 2, 1, 3, 9, 4, 8, 6, 7, 5, 1, 8, 5, 2, 7, 4, 3, 9, 6, 7, 4, 2, 3, 9, 6, 5, 1, 8, 6, 3, 9, 8, 5, 1, 7, 2, 4], "pieces": [{"cells": [[4, 5], [4, 6], [5, 3], [5, 4], [5, 5], [6, 3]], "vals": [5, 4, 9, 4, 8, 2], "given": false}, {"cells": [[3, 7], [4, 7], [5, 6], [5, 7], [6, 6], [6, 7]], "vals": [8, 3, 6, 7, 3, 9], "given": true}, {"cells": [[6, 8], [7, 6], [7, 7], [7, 8], [8, 6], [8, 7], [8, 8]], "vals": [6, 5, 1, 8, 7, 2, 4], "given": false}, {"cells": [[0, 3], [0, 4], [0, 5], [1, 3], [1, 4], [1, 5], [2, 4]], "vals": [6, 1, 7, 4, 8, 9, 3], "given": false}, {"cells": [[7, 2], [7, 3], [8, 2], [8, 3], [8, 4], [8, 5]], "vals": [2, 3, 9, 8, 5, 1], "given": false}, {"cells": [[4, 2], [5, 1], [5, 2], [6, 1], [6, 2]], "vals": [6, 1, 3, 8, 5], "given": true}, {"cells": [[6, 4], [6, 5], [7, 4], [7, 5]], "vals": [7, 4, 9, 6], "given": true}, {"cells": [[0, 6], [0, 7], [0, 8], [1, 6], [1, 7], [1, 8]], "vals": [9, 4, 3, 2, 5, 7], "given": false}, {"cells": [[6, 0], [7, 0], [7, 1], [8, 0], [8, 1]], "vals": [1, 7, 4, 6, 3], "given": false}, {"cells": [[2, 3], [3, 1], [3, 2], [3, 3], [4, 3], [4, 4]], "vals": [5, 5, 4, 7, 1, 2], "given": false}, {"cells": [[2, 5], [2, 6], [2, 7], [2, 8], [3, 4], [3, 5], [3, 6]], "vals": [2, 8, 6, 1, 6, 3, 1], "given": true}, {"cells": [[3, 8], [4, 8], [5, 8]], "vals": [2, 9, 5], "given": false}, {"cells": [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1], [3, 0]], "vals": [5, 2, 3, 6, 4, 9, 9], "given": false}, {"cells": [[4, 0], [4, 1], [5, 0]], "vals": [8, 7, 2], "given": false}, {"cells": [[0, 2], [1, 2], [2, 2]], "vals": [8, 1, 7], "given": true}], "stats": {"totalPieces": 15, "givenPieces": 5, "givenCells": 25, "trayPieces": 10, "trayCells": 56, "avgTraySize": 5.6, "minSize": 3, "maxSize": 7}}, {"seed": "LB-N-20261023", "difficulty": "normal", "solution": [8, 7, 6, 5, 2, 1, 9, 4, 3, 3, 4, 1, 8, 6, 9, 2, 5, 7, 9, 2, 5, 4, 7, 3, 6, 1, 8, 7, 3, 8, 1, 5, 2, 4, 6, 9, 1, 5, 9, 6, 8, 4, 7, 3, 2, 4, 6, 2, 9, 3, 7, 5, 8, 1, 6, 9, 4, 2, 1, 8, 3, 7, 5, 2, 8, 3, 7, 4, 5, 1, 9, 6, 5, 1, 7, 3, 9, 6, 8, 2, 4], "pieces": [{"cells": [[5, 1], [6, 1], [7, 1], [8, 1]], "vals": [6, 9, 8, 1], "given": false}, {"cells": [[0, 8], [1, 8], [2, 7], [2, 8]], "vals": [3, 7, 1, 8], "given": false}, {"cells": [[5, 5], [5, 6], [6, 4], [6, 5], [6, 6], [7, 5], [7, 6], [8, 5]], "vals": [7, 5, 1, 8, 3, 5, 1, 6], "given": false}, {"cells": [[0, 4], [0, 5], [1, 3], [1, 4]], "vals": [2, 1, 8, 6], "given": false}, {"cells": [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2], [2, 2]], "vals": [8, 7, 6, 5, 4, 1, 5], "given": true}, {"cells": [[5, 2], [5, 3], [5, 4], [6, 3], [7, 3]], "vals": [2, 9, 3, 2, 7], "given": false}, {"cells": [[6, 7], [7, 7], [8, 6], [8, 7]], "vals": [7, 9, 8, 2], "given": false}, {"cells": [[6, 2], [7, 2], [7, 4], [8, 2], [8, 3], [8, 4]], "vals": [4, 3, 4, 7, 3, 9], "given": true}, {"cells": [[2, 3], [3, 2], [3, 3], [3, 4], [3, 5]], "vals": [4, 8, 1, 5, 2], "given": false}, {"cells": [[3, 8], [4, 8], [5, 7], [5, 8], [6, 8], [7, 8], [8, 8]], "vals": [9, 2, 8, 1, 5, 6, 4], "given": true}, {"cells": [[3, 6], [3, 7], [4, 6], [4, 7]], "vals": [4, 6, 7, 3], "given": true}, {"cells": [[3, 0], [3, 1], [4, 0], [4, 1], [4, 2]], "vals": [7, 3, 1, 5, 9], "given": false}, {"cells": [[1, 5], [2, 4], [2, 5], [2, 6]], "vals": [9, 7, 3, 6], "given": false}, {"cells": [[0, 6], [0, 7], [1, 6], [1, 7]], "vals": [9, 4, 2, 5], "given": false}, {"cells": [[5, 0], [6, 0], [7, 0], [8, 0]], "vals": [4, 6, 2, 5], "given": false}, {"cells": [[1, 0], [2, 0], [2, 1]], "vals": [3, 9, 2], "given": true}, {"cells": [[4, 3], [4, 4], [4, 5]], "vals": [6, 8, 4], "given": false}], "stats": {"totalPieces": 17, "givenPieces": 5, "givenCells": 27, "trayPieces": 12, "trayCells": 54, "avgTraySize": 4.5, "minSize": 3, "maxSize": 8}}, {"seed": "LB-H-20261023", "difficulty": "hard", "solution": [3, 8, 2, 9, 6, 1, 7, 4, 5, 7, 1, 9, 5, 2, 4, 8, 3, 6, 6, 4, 5, 8, 3, 7, 1, 2, 9, 9, 5, 3, 7, 4, 6, 2, 8, 1, 1, 6, 7, 3, 8, 2, 9, 5, 4, 8, 2, 4, 1, 5, 9, 3, 6, 7, 5, 7, 8, 4, 9, 3, 6, 1, 2, 2, 3, 1, 6, 7, 5, 4, 9, 8, 4, 9, 6, 2, 1, 8, 5, 7, 3], "pieces": [{"cells": [[8, 4], [8, 5], [8, 6]], "vals": [1, 8, 5], "given": false}, {"cells": [[2, 6], [3, 6], [3, 7], [4, 6], [4, 7]], "vals": [1, 2, 8, 9, 5], "given": false}, {"cells": [[1, 3], [1, 4], [1, 5]], "vals": [5, 2, 4], "given": false}, {"cells": [[1, 2], [2, 2], [2, 3], [3, 2], [3, 3], [4, 3]], "vals": [9, 5, 8, 3, 7, 3], "given": false}, {"cells": [[3, 1], [4, 1], [5, 1]], "vals": [5, 6, 2], "given": false}, {"cells": [[0, 0], [0, 1], [1, 0], [1, 1], [2, 1]], "vals": [3, 8, 7, 1, 4], "given": true}, {"cells": [[6, 0], [7, 0], [8, 0]], "vals": [5, 2, 4], "given": false}, {"cells": [[0, 7], [1, 7], [2, 7]], "vals": [4, 3, 2], "given": false}, {"cells": [[7, 2], [8, 2], [8, 3]], "vals": [1, 6, 2], "given": false}, {"cells": [[2, 0], [3, 0], [4, 0], [5, 0]], "vals": [6, 9, 1, 8], "given": false}, {"cells": [[4, 8], [5, 7], [5, 8], [6, 7], [6, 8]], "vals": [4, 6, 7, 1, 2], "given": false}, {"cells": [[5, 4], [6, 4], [7, 4], [7, 5]], "vals": [5, 9, 7, 5], "given": false}, {"cells": [[5, 6], [6, 6], [7, 6], [7, 7], [7, 8], [8, 7], [8, 8]], "vals": [3, 6, 4, 9, 8, 7, 3], "given": false}, {"cells": [[4, 2], [5, 2], [5, 3], [6, 3], [7, 3]], "vals": [7, 4, 1, 4, 6], "given": false}, {"cells": [[4, 4], [4, 5], [5, 5], [6, 5]], "vals": [8, 2, 9, 3], "given": false}, {"cells": [[0, 2], [0, 3], [0, 4]], "vals": [2, 9, 6], "given": false}, {"cells": [[6, 1], [6, 2], [7, 1], [8, 1]], "vals": [7, 8, 3, 9], "given": false}, {"cells": [[0, 8], [1, 8], [2, 8], [3, 8]], "vals": [5, 6, 9, 1], "given": false}, {"cells": [[0, 5], [0, 6], [1, 6]], "vals": [1, 7, 8], "given": false}, {"cells": [[2, 4], [2, 5], [3, 4], [3, 5]], "vals": [3, 7, 4, 6], "given": false}], "stats": {"totalPieces": 20, "givenPieces": 1, "givenCells": 5, "trayPieces": 19, "trayCells": 76, "avgTraySize": 4.0, "minSize": 3, "maxSize": 7}}];
 const DIFF_LABEL = {easy:"簡單", normal:"普通", hard:"困難"};
+const PREVIEW_FREE = {easy:8, normal:5, hard:5};
+const DIFF_BLURB = {
+  easy:"定版多（每宮都有定版格）、大件為主 · 免費撞數預覽 8 次",
+  normal:"定版中等、中等件 · 免費撞數預覽 5 次",
+  hard:"定版少（四角有錨）、細件為主 · 免費撞數預覽 5 次"
+};
 const DIFF_DESC = {
   easy: b=>`定版 ${b.stats.givenPieces} 件（${b.stats.givenCells} 格，每宮都有）· 待放 ${b.stats.trayPieces} 件，大件為主（平均 ${b.stats.avgTraySize} 格）`,
   normal: b=>`定版 ${b.stats.givenPieces} 件（${b.stats.givenCells} 格）· 待放 ${b.stats.trayPieces} 件（平均 ${b.stats.avgTraySize} 格）`,
@@ -196,19 +220,47 @@ function fmt(s){ s=Math.max(0,Math.ceil(s)); return String(Math.floor(s/60)).pad
 /* ---------- menu ---------- */
 function buildMenu(){
   const list = $("diffList"); list.innerHTML = "";
-  for(const b of BOARDS){
+  for(const diff of ["easy","normal","hard"]){
     const btn = document.createElement("button");
-    btn.className = "diff-btn" + (b.difficulty===selDiff ? " sel" : "");
-    btn.innerHTML = `<b>${DIFF_LABEL[b.difficulty]}</b>　<span style="display:inline;color:#a25">種子 ${b.seed}</span><span>${DIFF_DESC[b.difficulty](b)}</span>`;
-    btn.onclick = ()=>{ selDiff = b.difficulty; $("timerChk").checked = (b.difficulty==="hard"); buildMenu(); };
+    btn.className = "diff-btn" + (diff===selDiff ? " sel" : "");
+    btn.innerHTML = `<b>${DIFF_LABEL[diff]}</b><span>${DIFF_BLURB[diff]}</span>`;
+    btn.onclick = ()=>{ selDiff = diff; $("timerChk").checked = (diff==="hard"); buildMenu(); };
     list.appendChild(btn);
   }
   $("timerChk").checked = (selDiff==="hard");
 }
+let seedMode = "daily";
+const SEED_NOTE = {
+  daily:"每日盤：用今日日期做種子，人人同一盤；聽日自動換新盤。",
+  random:"隨機盤：即刻生成一個新種子，呢盤只有你有；抄低種子就可以分享返同一盤。",
+  custom:"自訂種子：同一個種子永遠出同一盤——朋友入返同一個種子，就玩到同一盤。",
+  classic:"經典三盤：試手嗰三盤（簡單 LB-E／普通 LB-N／困難 LB-H），跟你揀嘅難度出。"
+};
+function buildSeedRow(){
+  document.querySelectorAll(".seed-chip").forEach(ch=>{
+    ch.classList.toggle("sel", ch.dataset.mode===seedMode);
+    ch.onclick = ()=>{ seedMode = ch.dataset.mode; buildSeedRow(); };
+  });
+  $("seedInput").classList.toggle("hidden", seedMode!=="custom");
+  $("seedNote").textContent = SEED_NOTE[seedMode];
+}
+function todaySeed(diff){
+  const d = new Date(), p = n=>String(n).padStart(2,"0");
+  return `LB-${diff[0].toUpperCase()}-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
+}
+function boardForStart(diff){
+  if(seedMode==="classic") return BOARDS.find(b=>b.difficulty===diff);
+  let seed;
+  if(seedMode==="daily") seed = todaySeed(diff);
+  else if(seedMode==="random") seed = "LB-" + diff[0].toUpperCase() + "-" + Math.random().toString(36).slice(2,8).toUpperCase();
+  else seed = $("seedInput").value.trim() || "LB-CUSTOM-1";
+  try{ return window.LotusGenerator.generateBoard(seed, diff); }
+  catch(e){ return BOARDS.find(b=>b.difficulty===diff); }
+}
 $("startBtn").onclick = ()=>{
   $("menu").classList.add("hidden");
   $("game").classList.remove("hidden");
-  newGame(selDiff, $("timerChk").checked);
+  newGame(boardForStart(selDiff), $("timerChk").checked);
   window.scrollTo({top:0});
 };
 
@@ -270,7 +322,6 @@ function renderBoard(){
     if(cell) el.classList.add(cell.piece.given ? "given" : "placed");
     if(bad.has(k)) el.classList.add("conflict");
     if(pv.bad.has(k)) el.classList.add("pv-bad"); else if(pv.ok.has(k)) el.classList.add("pv-ok");
-    if(G.hintCells && G.hintCells.has(k)) el.classList.add("hint-flash");
   }
 }
 function renderTray(){
@@ -301,18 +352,20 @@ function renderHud(){
   $("hudTime").innerHTML = (G.timerOn ? "⏳ 剩 " : "⏱ ") + "<b>" + fmt(shown) + "</b>";
   $("hudTime").style.color = (G.timerOn && shown <= 60 && G.state==="playing") ? "var(--bad)" : "";
   $("hudErr").innerHTML = `試錯 <b>${G.errors}</b>/${3 + G.revives}`;
-  $("hintBtn").disabled = G.state !== "playing";
+  $("hudPv").innerHTML = `撞數預覽 <b>${G.previewLeft}</b>`;
+  $("pvBtn").disabled = G.state !== "playing" || G.previewAds >= 2;
+  $("pvBtn").textContent = G.previewAds >= 2 ? "👁 預覽已買滿（2/2）" : `👁 預覽 +3（廣告 ${G.previewAds}/2）`;
 }
 function renderAll(){ renderBoard(); renderTray(); renderHud(); }
 
 /* ---------- game flow ---------- */
-function newGame(diff, timerOn){
-  const board = BOARDS.find(b=>b.difficulty===diff);
+function newGame(board, timerOn){
   const pieces = makePieces(board);
   const trayCount = pieces.filter(p=>!p.given).length;
-  G = { board, pieces, diff, timerOn, limit: trayCount*30,
-        errors:0, revives:0, hints:0, elapsed:0, state:"playing",
-        drag:null, preview:null, hintCells:null };
+  G = { board, pieces, diff: board.difficulty, timerOn, limit: trayCount*30,
+        errors:0, revives:0, previewLeft: PREVIEW_FREE[board.difficulty], previewAds:0,
+        elapsed:0, state:"playing",
+        drag:null, preview:null };
   $("board").innerHTML = "";
   hideOv("reviveOv"); hideOv("doneOv"); hideOv("pauseOv");
   renderAll();
@@ -367,11 +420,11 @@ function checkWin(){
   const core = document.createElement("div"); core.className = "core"; bloom.appendChild(core);
   $("doneStats").innerHTML =
     `難度 <b>${DIFF_LABEL[G.diff]}</b><br>種子 <b>${G.board.seed}</b><br>用時 <b>${fmt(G.elapsed)}</b><br>` +
-    `試錯 <b>${G.errors} 次</b><br>復活 <b>${G.revives} 次</b><br>提示 <b>${G.hints} 次</b><br>限時 <b>${G.timerOn ? "有開（限 "+fmt(G.limit)+"）" : "冇開"}</b>`;
+    `試錯 <b>${G.errors} 次</b><br>復活 <b>${G.revives} 次</b><br>買預覽 <b>${G.previewAds} 次</b><br>限時 <b>${G.timerOn ? "有開（限 "+fmt(G.limit)+"）" : "冇開"}</b>`;
   showOv("doneOv");
 }
 function resultText(){
-  return `Lotus Blocks 試手 v0.1.3｜難度：${DIFF_LABEL[G.diff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜提示：${G.hints}｜限時：${G.timerOn ? "有" : "冇"}`;
+  return `Lotus Blocks 試手 v0.2｜難度：${DIFF_LABEL[G.diff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}`;
 }
 </script>
 
@@ -399,7 +452,7 @@ function pauseGame(){
 $("pauseBtn").onclick = pauseGame;
 $("resumeBtn").onclick = ()=>{ if(G){ G.state="playing"; } hideOv("pauseOv"); };
 $("pauseHomeBtn").onclick = goHome;
-$("restartBtn").onclick = ()=>{ if(G) newGame(G.diff, G.timerOn); };
+$("restartBtn").onclick = ()=>{ if(G) newGame(G.board, G.timerOn); };
 $("homeBtn").onclick = goHome;
 document.addEventListener("visibilitychange", ()=>{ if(document.hidden) pauseGame(); });
 
@@ -408,9 +461,9 @@ $("reviveBtn").onclick = ()=> fakeAd(()=>{
   if(G.timerOn) G.elapsed = Math.max(0, G.elapsed - 60);
   hideOv("reviveOv"); G.state = "playing"; renderAll();
 });
-$("reviveRestartBtn").onclick = ()=>{ const d=G.diff, t=G.timerOn; hideOv("reviveOv"); newGame(d,t); };
+$("reviveRestartBtn").onclick = ()=>{ const b=G.board, t=G.timerOn; hideOv("reviveOv"); newGame(b,t); };
 $("reviveHomeBtn").onclick = goHome;
-$("againBtn").onclick = ()=>{ const d=G.diff, t=G.timerOn; hideOv("doneOv"); newGame(d,t); };
+$("againBtn").onclick = ()=>{ const b=G.board, t=G.timerOn; hideOv("doneOv"); newGame(b,t); };
 $("doneHomeBtn").onclick = goHome;
 $("copyBtn").onclick = async ()=>{
   const txt = resultText();
@@ -423,19 +476,19 @@ $("copyBtn").onclick = async ()=>{
   $("copyBtn").textContent = "✓ 已複製，去貼低啦";
   setTimeout(()=>{ $("copyBtn").textContent = "📋 複製本場成績"; }, 2200);
 };
-$("hintBtn").onclick = ()=>{
-  if(!G || G.state!=="playing") return;
+let toastTimer = null;
+function showToast(msg){
+  const t = $("toast"); if(!t) return;
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove("show"), 5200);
+}
+$("pvBtn").onclick = ()=>{
+  if(!G || G.state!=="playing" || G.previewAds >= 2) return;
   fakeAd(()=>{
     if(!G || G.state!=="playing") return;
-    G.hints++;
-    let target = G.pieces.find(p=>!p.given && !p.placed);
-    if(!target) target = G.pieces.find(p=>!p.given && p.placed && (p.at.r!==p.target.r || p.at.c!==p.target.c));
-    if(target){
-      G.hintCells = new Set(target.shape.map(s=>(target.target.r+s.dr)+","+(target.target.c+s.dc)));
-      renderAll();
-      setTimeout(()=>{ if(G){ G.hintCells=null; renderBoard(); } }, 3200);
-    }
+    G.previewAds++; G.previewLeft += 3;
     renderHud();
+    showToast(`撞數預覽 +3，而家有 ${G.previewLeft} 次（買預覽 ${G.previewAds}/2）。`);
   });
 };
 
@@ -483,6 +536,7 @@ function updatePreview(x, y){
   for(const s of p.shape){
     const r = a.r + s.dr, c = a.c + s.dc, k = r+","+c;
     if(occ.has(k)){ bad.add(k); overlap = true; continue; }
+    if(G.previewLeft <= 0){ ok.add(k); continue; }
     let clash = false;
     const scan = [];
     for(let i=0;i<9;i++){ scan.push(r+","+i); scan.push(i+","+c); }
@@ -517,7 +571,10 @@ function endDrag(commit){
   if(commit && d.hover && !d.hoverInvalid){
     const sameSpot = d.prevAt && d.hover.r===d.prevAt.r && d.hover.c===d.prevAt.c;
     p.at = {r:d.hover.r, c:d.hover.c}; p.placed = true;
+    let consumedLast = false;
+    if(!sameSpot && G.previewLeft > 0){ G.previewLeft--; consumedLast = G.previewLeft === 0; }
     renderAll();
+    if(consumedLast) showToast("免費撞數預覽用完咗——之後放件唔會再提示撞數，靠自己判斷。需要嘅話可以撳「預覽 +3」買返（每局最多 2 次）。");
     if(!sameSpot){
       const bad = conflictSet(occupancy());
       const mineBad = p.shape.some(s=>bad.has((p.at.r+s.dr)+","+(p.at.c+s.dc)));
@@ -566,6 +623,7 @@ function fitCell(){
 window.addEventListener("resize", fitCell);
 fitCell();
 buildMenu();
+buildSeedRow();
 </script>
 </body>
 </html>
