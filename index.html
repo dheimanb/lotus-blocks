@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lotus Blocks — 試手 v0.4</title>
+<title>Lotus Blocks — 試手 v0.4.1</title>
 <style>
   :root{
     --ink:#2e3a34; --sage:#476b5d; --sage-d:#38564b; --petal:#d96c8a; --petal-soft:#f7e0e8;
@@ -55,6 +55,10 @@
   body.in-game .board-wrap{margin-top:8px}
   body.in-game .tray-title{margin-top:10px;font-size:.8rem}
   body.in-game #tray{gap:8px;margin-top:6px;padding:10px;min-height:0}
+  /* v0.4.1 入局鎖滑動：求解器話入到先鎖，極矮屏就唔鎖（寧願滑好過睇唔到件盤） */
+  body.in-game.scroll-locked{position:fixed;width:100%;overflow:hidden;overscroll-behavior:none}
+  body.in-game.scroll-locked #game{touch-action:none}
+  .chip-btn.pv-buy{border-color:var(--petal);color:var(--petal);font-weight:700}
   /* ---------- board ---------- */
   .board-wrap{display:flex;justify-content:center;margin-top:12px}
   #board{display:grid;grid-template-columns:repeat(9,var(--cell));grid-template-rows:repeat(9,var(--cell));background:var(--sage-d);gap:1px;padding:3px;border-radius:8px;touch-action:none}
@@ -120,7 +124,7 @@
 <div class="wrap">
   <header class="top">
     <h1>Lotus Blocks</h1>
-    <div class="sub">試 手 v0.4 · PLAYTEST</div>
+    <div class="sub">試 手 v0.4.1 · PLAYTEST</div>
   </header>
 
   <!-- ======== MENU ======== -->
@@ -131,7 +135,6 @@
       <button class="seed-chip" data-mode="daily">📅 每日盤</button>
       <button class="seed-chip" data-mode="random">🎲 隨機</button>
       <button class="seed-chip" data-mode="custom">✍️ 自訂種子</button>
-      <button class="seed-chip" data-mode="classic">🌸 經典三盤</button>
     </div>
     <input id="seedInput" class="seed-input hidden" placeholder="輸入種子，例如 LB-X-1（同種子＝同盤）">
     <p class="note" id="seedNote"></p>
@@ -143,7 +146,7 @@
       </div>
     </label>
     <button class="start-btn" id="startBtn">開始</button>
-    <p class="note">試手版：廣告位係假掣，會扮播 1 秒廣告。撞數預覽改為逐件啟用：拖方塊之前撳遊戲上方嘅「撞數預覽」掣，下一件先會顯示撞數並扣 1 次（簡單 A 8 次、簡單 B／普通／困難 5 次）；冇啟用嗰陣只會提示有冇疊格。用完可以睇廣告 +2（每局最多買 2 次）。放錯唔會即刻趕你走——撞數嘅格會標紅，鬆手嗰刻有撞數先計一次試錯，上限 3 次，之後可以睇廣告復活（每局最多 2 次；買預覽同復活分開計）。已放嘅方塊拖出盤面任何位置鬆手就可以收回（唔退預覽、唔取消試錯）。</p>
+    <p class="note">試手版：廣告位係假掣，會扮播 1 秒廣告。撞數預覽改為逐件啟用：拖方塊之前撳遊戲上方嘅「撞數預覽」掣，下一件先會顯示撞數並扣 1 次（簡單 8 次、普通／困難 5 次）；冇啟用嗰陣只會提示有冇疊格。用光之後同一個掣會變成「預覽 +2」，撳就睇廣告加 2 次（每局最多買 2 次，買完即刻自動啟用下一件）；提早買唔提供。放錯唔會即刻趕你走——撞數嘅格會標紅，鬆手嗰刻有撞數先計一次試錯，上限 3 次，之後可以睇廣告復活（每局最多 2 次；買預覽同復活分開計）。已放嘅方塊拖出盤面任何位置鬆手就可以收回（唔退預覽、唔取消試錯）。</p>
     <div class="rec-row">
       <span class="chip">📒 試玩記錄 <b id="recCount">0</b> 盤</span>
       <button class="hbtn" id="recExportBtn">📋 匯出全部記錄</button>
@@ -160,10 +163,9 @@
         <span class="chip">種子 <b id="hudSeed">—</b></span>
         <span class="chip" id="hudTime">⏱ <b>00:00</b></span>
         <span class="chip err" id="hudErr">試錯 <b>0</b>/3</span>
-        <button class="chip chip-btn" id="hudPv" type="button" aria-pressed="false" title="撳一下，令下一件有撞數預覽">撞數預覽 <b>0</b></button>
+        <button class="chip chip-btn" id="hudPv" type="button" aria-pressed="false" title="撞數預覽掣">撞數預覽 <b>0</b></button>
       </div>
       <div class="grp">
-        <button class="hbtn" id="pvBtn">👁 預覽 +2（廣告）</button>
         <button class="hbtn" id="pauseBtn">⏸ 暫停</button>
         <button class="hbtn" id="restartBtn">↺ 重開</button>
         <button class="hbtn" id="homeBtn">主頁</button>
@@ -171,11 +173,11 @@
     </div>
     <div id="toast"></div>
     <div class="board-wrap"><div id="board"></div></div>
-    <div class="tray-title">件 盤（拖方塊上盤；已放嘅方塊拖出盤面即可收回）</div>
+    <div class="tray-title">件 盤（拖方塊上盤；拖出盤面即可收回）</div>
     <div id="tray"></div>
   </section>
 
-  <footer>Lotus Blocks 試手 v0.4 — 驗證手感用，唔係完成品。<br>每盤成績會自動記錄，喺主頁撳「匯出全部記錄」一次過貼返俾開發者。</footer>
+  <footer>Lotus Blocks 試手 v0.4.1 — 驗證手感用，唔係完成品。<br>每盤成績會自動記錄，喺主頁撳「匯出全部記錄」一次過貼返俾開發者。</footer>
 </div>
 
 <!-- ======== PAUSE ======== -->
@@ -226,11 +228,10 @@
 <script src="generator.js"></script>
 <script>
 const BOARDS = [{"seed": "LB-E-20261023", "difficulty": "easy", "solution": [5, 2, 8, 6, 1, 7, 9, 4, 3, 3, 6, 1, 4, 8, 9, 2, 5, 7, 4, 9, 7, 5, 3, 2, 8, 6, 1, 9, 5, 4, 7, 6, 3, 1, 8, 2, 8, 7, 6, 1, 2, 5, 4, 3, 9, 2, 1, 3, 9, 4, 8, 6, 7, 5, 1, 8, 5, 2, 7, 4, 3, 9, 6, 7, 4, 2, 3, 9, 6, 5, 1, 8, 6, 3, 9, 8, 5, 1, 7, 2, 4], "pieces": [{"cells": [[4, 5], [4, 6], [5, 3], [5, 4], [5, 5], [6, 3]], "vals": [5, 4, 9, 4, 8, 2], "given": false}, {"cells": [[3, 7], [4, 7], [5, 6], [5, 7], [6, 6], [6, 7]], "vals": [8, 3, 6, 7, 3, 9], "given": true}, {"cells": [[6, 8], [7, 6], [7, 7], [7, 8], [8, 6], [8, 7], [8, 8]], "vals": [6, 5, 1, 8, 7, 2, 4], "given": false}, {"cells": [[0, 3], [0, 4], [0, 5], [1, 3], [1, 4], [1, 5], [2, 4]], "vals": [6, 1, 7, 4, 8, 9, 3], "given": false}, {"cells": [[7, 2], [7, 3], [8, 2], [8, 3], [8, 4], [8, 5]], "vals": [2, 3, 9, 8, 5, 1], "given": false}, {"cells": [[4, 2], [5, 1], [5, 2], [6, 1], [6, 2]], "vals": [6, 1, 3, 8, 5], "given": true}, {"cells": [[6, 4], [6, 5], [7, 4], [7, 5]], "vals": [7, 4, 9, 6], "given": true}, {"cells": [[0, 6], [0, 7], [0, 8], [1, 6], [1, 7], [1, 8]], "vals": [9, 4, 3, 2, 5, 7], "given": false}, {"cells": [[6, 0], [7, 0], [7, 1], [8, 0], [8, 1]], "vals": [1, 7, 4, 6, 3], "given": false}, {"cells": [[2, 3], [3, 1], [3, 2], [3, 3], [4, 3], [4, 4]], "vals": [5, 5, 4, 7, 1, 2], "given": false}, {"cells": [[2, 5], [2, 6], [2, 7], [2, 8], [3, 4], [3, 5], [3, 6]], "vals": [2, 8, 6, 1, 6, 3, 1], "given": true}, {"cells": [[3, 8], [4, 8], [5, 8]], "vals": [2, 9, 5], "given": false}, {"cells": [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1], [3, 0]], "vals": [5, 2, 3, 6, 4, 9, 9], "given": false}, {"cells": [[4, 0], [4, 1], [5, 0]], "vals": [8, 7, 2], "given": false}, {"cells": [[0, 2], [1, 2], [2, 2]], "vals": [8, 1, 7], "given": true}], "stats": {"totalPieces": 15, "givenPieces": 5, "givenCells": 25, "trayPieces": 10, "trayCells": 56, "avgTraySize": 5.6, "minSize": 3, "maxSize": 7}}, {"seed": "LB-N-20261023", "difficulty": "normal", "solution": [8, 7, 6, 5, 2, 1, 9, 4, 3, 3, 4, 1, 8, 6, 9, 2, 5, 7, 9, 2, 5, 4, 7, 3, 6, 1, 8, 7, 3, 8, 1, 5, 2, 4, 6, 9, 1, 5, 9, 6, 8, 4, 7, 3, 2, 4, 6, 2, 9, 3, 7, 5, 8, 1, 6, 9, 4, 2, 1, 8, 3, 7, 5, 2, 8, 3, 7, 4, 5, 1, 9, 6, 5, 1, 7, 3, 9, 6, 8, 2, 4], "pieces": [{"cells": [[5, 1], [6, 1], [7, 1], [8, 1]], "vals": [6, 9, 8, 1], "given": false}, {"cells": [[0, 8], [1, 8], [2, 7], [2, 8]], "vals": [3, 7, 1, 8], "given": false}, {"cells": [[5, 5], [5, 6], [6, 4], [6, 5], [6, 6], [7, 5], [7, 6], [8, 5]], "vals": [7, 5, 1, 8, 3, 5, 1, 6], "given": false}, {"cells": [[0, 4], [0, 5], [1, 3], [1, 4]], "vals": [2, 1, 8, 6], "given": false}, {"cells": [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2], [2, 2]], "vals": [8, 7, 6, 5, 4, 1, 5], "given": true}, {"cells": [[5, 2], [5, 3], [5, 4], [6, 3], [7, 3]], "vals": [2, 9, 3, 2, 7], "given": false}, {"cells": [[6, 7], [7, 7], [8, 6], [8, 7]], "vals": [7, 9, 8, 2], "given": false}, {"cells": [[6, 2], [7, 2], [7, 4], [8, 2], [8, 3], [8, 4]], "vals": [4, 3, 4, 7, 3, 9], "given": true}, {"cells": [[2, 3], [3, 2], [3, 3], [3, 4], [3, 5]], "vals": [4, 8, 1, 5, 2], "given": false}, {"cells": [[3, 8], [4, 8], [5, 7], [5, 8], [6, 8], [7, 8], [8, 8]], "vals": [9, 2, 8, 1, 5, 6, 4], "given": true}, {"cells": [[3, 6], [3, 7], [4, 6], [4, 7]], "vals": [4, 6, 7, 3], "given": true}, {"cells": [[3, 0], [3, 1], [4, 0], [4, 1], [4, 2]], "vals": [7, 3, 1, 5, 9], "given": false}, {"cells": [[1, 5], [2, 4], [2, 5], [2, 6]], "vals": [9, 7, 3, 6], "given": false}, {"cells": [[0, 6], [0, 7], [1, 6], [1, 7]], "vals": [9, 4, 2, 5], "given": false}, {"cells": [[5, 0], [6, 0], [7, 0], [8, 0]], "vals": [4, 6, 2, 5], "given": false}, {"cells": [[1, 0], [2, 0], [2, 1]], "vals": [3, 9, 2], "given": true}, {"cells": [[4, 3], [4, 4], [4, 5]], "vals": [6, 8, 4], "given": false}], "stats": {"totalPieces": 17, "givenPieces": 5, "givenCells": 27, "trayPieces": 12, "trayCells": 54, "avgTraySize": 4.5, "minSize": 3, "maxSize": 8}}, {"seed": "LB-H-20261023", "difficulty": "hard", "solution": [3, 8, 2, 9, 6, 1, 7, 4, 5, 7, 1, 9, 5, 2, 4, 8, 3, 6, 6, 4, 5, 8, 3, 7, 1, 2, 9, 9, 5, 3, 7, 4, 6, 2, 8, 1, 1, 6, 7, 3, 8, 2, 9, 5, 4, 8, 2, 4, 1, 5, 9, 3, 6, 7, 5, 7, 8, 4, 9, 3, 6, 1, 2, 2, 3, 1, 6, 7, 5, 4, 9, 8, 4, 9, 6, 2, 1, 8, 5, 7, 3], "pieces": [{"cells": [[8, 4], [8, 5], [8, 6]], "vals": [1, 8, 5], "given": false}, {"cells": [[2, 6], [3, 6], [3, 7], [4, 6], [4, 7]], "vals": [1, 2, 8, 9, 5], "given": false}, {"cells": [[1, 3], [1, 4], [1, 5]], "vals": [5, 2, 4], "given": false}, {"cells": [[1, 2], [2, 2], [2, 3], [3, 2], [3, 3], [4, 3]], "vals": [9, 5, 8, 3, 7, 3], "given": false}, {"cells": [[3, 1], [4, 1], [5, 1]], "vals": [5, 6, 2], "given": false}, {"cells": [[0, 0], [0, 1], [1, 0], [1, 1], [2, 1]], "vals": [3, 8, 7, 1, 4], "given": true}, {"cells": [[6, 0], [7, 0], [8, 0]], "vals": [5, 2, 4], "given": false}, {"cells": [[0, 7], [1, 7], [2, 7]], "vals": [4, 3, 2], "given": false}, {"cells": [[7, 2], [8, 2], [8, 3]], "vals": [1, 6, 2], "given": false}, {"cells": [[2, 0], [3, 0], [4, 0], [5, 0]], "vals": [6, 9, 1, 8], "given": false}, {"cells": [[4, 8], [5, 7], [5, 8], [6, 7], [6, 8]], "vals": [4, 6, 7, 1, 2], "given": false}, {"cells": [[5, 4], [6, 4], [7, 4], [7, 5]], "vals": [5, 9, 7, 5], "given": false}, {"cells": [[5, 6], [6, 6], [7, 6], [7, 7], [7, 8], [8, 7], [8, 8]], "vals": [3, 6, 4, 9, 8, 7, 3], "given": false}, {"cells": [[4, 2], [5, 2], [5, 3], [6, 3], [7, 3]], "vals": [7, 4, 1, 4, 6], "given": false}, {"cells": [[4, 4], [4, 5], [5, 5], [6, 5]], "vals": [8, 2, 9, 3], "given": false}, {"cells": [[0, 2], [0, 3], [0, 4]], "vals": [2, 9, 6], "given": false}, {"cells": [[6, 1], [6, 2], [7, 1], [8, 1]], "vals": [7, 8, 3, 9], "given": false}, {"cells": [[0, 8], [1, 8], [2, 8], [3, 8]], "vals": [5, 6, 9, 1], "given": false}, {"cells": [[0, 5], [0, 6], [1, 6]], "vals": [1, 7, 8], "given": false}, {"cells": [[2, 4], [2, 5], [3, 4], [3, 5]], "vals": [3, 7, 4, 6], "given": false}], "stats": {"totalPieces": 20, "givenPieces": 1, "givenCells": 5, "trayPieces": 19, "trayCells": 76, "avgTraySize": 4.0, "minSize": 3, "maxSize": 7}}];
-const DIFF_LABEL = {easyA:"簡單 A", easyB:"簡單 B", normal:"普通", hard:"困難"};
-const PREVIEW_FREE = {easyA:8, easyB:5, normal:5, hard:5};
+const DIFF_LABEL = {easy:"簡單", normal:"普通", hard:"困難"};
+const PREVIEW_FREE = {easy:8, normal:5, hard:5};
 const DIFF_BLURB = {
-  easyA:"定版件大、待放件細而多（約 13 件）· 免費撞數預覽 8 次（逐件啟用）",
-  easyB:"現行簡單盤面（待放約 10 件）· 免費撞數預覽 5 次（逐件啟用）",
+  easy:"定版件大、待放件細而多（約 13 件）· 免費撞數預覽 8 次（逐件啟用）",
   normal:"定版中等、中等件 · 免費撞數預覽 5 次（逐件啟用）",
   hard:"定版少（四角有錨）、細件為主 · 免費撞數預覽 5 次（逐件啟用）"
 };
@@ -248,7 +249,7 @@ function fmt(s){ s=Math.max(0,Math.ceil(s)); return String(Math.floor(s/60)).pad
 /* ---------- menu ---------- */
 function buildMenu(){
   const list = $("diffList"); list.innerHTML = "";
-  for(const diff of ["easyA","easyB","normal","hard"]){
+  for(const diff of ["easy","normal","hard"]){
     const btn = document.createElement("button");
     btn.className = "diff-btn" + (diff===selDiff ? " sel" : "");
     btn.innerHTML = `<b>${DIFF_LABEL[diff]}</b><span>${DIFF_BLURB[diff]}</span>`;
@@ -262,7 +263,6 @@ const SEED_NOTE = {
   daily:"每日盤：用今日日期做種子，人人同一盤；聽日自動換新盤。",
   random:"隨機盤：即刻生成一個新種子，呢盤只有你有；抄低種子就可以分享返同一盤。",
   custom:"自訂種子：同一個種子永遠出同一盤——朋友入返同一個種子，就玩到同一盤。",
-  classic:"經典三盤：試手嗰三盤（簡單 LB-E／普通 LB-N／困難 LB-H），跟你揀嘅難度出。"
 };
 function buildSeedRow(){
   document.querySelectorAll(".seed-chip").forEach(ch=>{
@@ -287,16 +287,16 @@ function genEasyVariantA(seed){
   finally{ C.easy = bak; }
 }
 function boardForStart(mdiff){
-  const base = mdiff === "easyA" || mdiff === "easyB" ? "easy" : mdiff;
-  if(seedMode==="classic") return BOARDS.find(b=>b.difficulty===base);
+  const base = mdiff;
   let seed;
   if(seedMode==="daily") seed = todaySeed(base);
   else if(seedMode==="random") seed = "LB-" + base[0].toUpperCase() + "-" + Math.random().toString(36).slice(2,8).toUpperCase();
   else seed = $("seedInput").value.trim() || "LB-CUSTOM-1";
   try{
-    if(mdiff === "easyA") return genEasyVariantA(seed);
+    if(mdiff === "easy") return genEasyVariantA(seed);
     return window.LotusGenerator.generateBoard(seed, base);
   }
+  /* BOARDS 只做 generator 失敗時嘅 fallback，唔再喺選單出現 */
   catch(e){ return BOARDS.find(b=>b.difficulty===base); }
 }
 $("startBtn").onclick = ()=>{
@@ -395,11 +395,21 @@ function renderHud(){
   $("hudTime").innerHTML = (G.timerOn ? "⏳ 剩 " : "⏱ ") + "<b>" + fmt(shown) + "</b>";
   $("hudTime").style.color = (G.timerOn && shown <= 60 && G.state==="playing") ? "var(--bad)" : "";
   $("hudErr").innerHTML = `試錯 <b>${G.errors}</b>/${3 + G.revives}`;
-  $("hudPv").innerHTML = `撞數預覽 <b>${G.previewLeft}</b>${G.previewArmed ? " · 下一件" : ""}`;
-  $("hudPv").setAttribute("aria-pressed", G.previewArmed ? "true" : "false");
-  $("hudPv").disabled = G.state !== "playing" || !!G.drag;
-  $("pvBtn").disabled = G.state !== "playing" || G.previewAds >= 2;
-  $("pvBtn").textContent = G.previewAds >= 2 ? "👁 預覽已買滿（2/2）" : `👁 預覽 +2（廣告 ${G.previewAds}/2）`;
+  const pv = $("hudPv");
+  if(G.previewLeft > 0){
+    pv.innerHTML = `撞數預覽 <b>${G.previewLeft}</b>${G.previewArmed ? " · 下一件" : ""}`;
+    pv.setAttribute("aria-pressed", G.previewArmed ? "true" : "false");
+    pv.classList.remove("pv-buy");
+  } else if(G.previewAds < 2){
+    pv.innerHTML = `👁 預覽 +2（廣告 ${G.previewAds}/2）`;
+    pv.setAttribute("aria-pressed", "false");
+    pv.classList.add("pv-buy");
+  } else {
+    pv.innerHTML = "預覽已用完";
+    pv.setAttribute("aria-pressed", "false");
+    pv.classList.remove("pv-buy");
+  }
+  pv.disabled = G.state !== "playing" || !!G.drag || (G.previewLeft <= 0 && G.previewAds >= 2);
 }
 function renderAll(){ renderBoard(); renderTray(); renderHud(); }
 
@@ -475,7 +485,7 @@ function checkWin(){
   showOv("doneOv");
 }
 function resultText(){
-  return `Lotus Blocks 試手 v0.4｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
+  return `Lotus Blocks 試手 v0.4.1｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
 }
 </script>
 
@@ -490,7 +500,7 @@ function fakeAd(cb){
 function goHome(){
   recordAbandon();
   G = null;
-  document.body.classList.remove("in-game");
+  document.body.classList.remove("in-game", "scroll-locked");
   ["pauseOv","reviveOv","doneOv","adOv"].forEach(hideOv);
   $("game").classList.add("hidden");
   $("menu").classList.remove("hidden");
@@ -540,7 +550,7 @@ function recordGame(result){
   const rs = loadRecords();
   const rec = {
     id: Date.now() + "-" + Math.floor(Math.random()*1e6),
-    ver:"v0.4", at:new Date().toISOString(),
+    ver:"v0.4.1", at:new Date().toISOString(),
     diff: DIFF_LABEL[G.mdiff], seed: G.board.seed, device: PLAY_DEVICE,
     secs: Math.round(G.elapsed), errors: G.errors, revives: G.revives, recycles: G.recycles || 0,
     pvAds: G.previewAds, timer: !!G.timerOn, result,
@@ -580,7 +590,7 @@ async function copyText(txt){
 $("recExportBtn").onclick = async ()=>{
   const rs = loadRecords();
   if(!rs.length){ $("recExportBtn").textContent = "（未有記錄）"; setTimeout(refreshRecBtn, 1800); return; }
-  const txt = `Lotus Blocks 試玩記錄（v0.4，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
+  const txt = `Lotus Blocks 試玩記錄（v0.4.1，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
   const ok = await copyText(txt);
   $("recExportBtn").textContent = ok ? "✓ 已複製，貼返俾開發者啦" : "複製失敗，請再試";
   setTimeout(refreshRecBtn, 2200);
@@ -598,18 +608,13 @@ function showToast(msg){
 }
 $("hudPv").onclick = ()=>{
   if(!G || G.state!=="playing" || G.drag) return;
-  if(G.previewLeft <= 0){ showToast("撞數預覽次數用完，撳「預覽 +2」睇廣告買返。"); return; }
-  G.previewArmed = !G.previewArmed;
-  renderHud();
-  showToast(G.previewArmed ? "下一件已啟用撞數預覽：拖嗰件嗰陣會顯示撞數，放去新位置先扣 1 次。" : "已取消下一件撞數預覽。");
-};
-$("pvBtn").onclick = ()=>{
-  if(!G || G.state!=="playing" || G.previewAds >= 2) return;
+  if(G.previewLeft > 0){ G.previewArmed = !G.previewArmed; renderHud(); return; }
+  if(G.previewAds >= 2) return;
+  /* 用光先買到；買完即刻自動 arm 下一件，掣本身嘅狀態就係提示，唔再彈 toast */
   fakeAd(()=>{
     if(!G || G.state!=="playing") return;
-    G.previewAds++; G.previewLeft += 2;
+    G.previewAds++; G.previewLeft += 2; G.previewArmed = true;
     renderHud();
-    showToast(`撞數預覽 +2，而家有 ${G.previewLeft} 次（買預覽 ${G.previewAds}/2）。`);
   });
 };
 
@@ -724,18 +729,15 @@ function endDrag(commit, x, y){
   if(commit && d.hover && !d.hoverInvalid){
     const sameSpot = d.prevAt && d.hover.r===d.prevAt.r && d.hover.c===d.prevAt.c;
     p.at = {r:d.hover.r, c:d.hover.c}; p.placed = true;
-    let consumedLast = false;
     const usedPreview = !sameSpot && G.previewArmed && G.previewLeft > 0;
     if(usedPreview){
       G.previewLeft--;
       G.previewArmed = false;
       if(G.previewLeft === 0){
-        consumedLast = true;
         if(G.pvCliff === null) G.pvCliff = G.pieces.filter(q=>!q.given && !q.placed).length;
       }
     }
     renderAll();
-    if(consumedLast) showToast("免費撞數預覽用完咗——之後放件唔會再提示撞數，靠自己判斷。需要嘅話可以撳「預覽 +2」買返（每局最多 2 次）。");
     if(!sameSpot){
       const bad = conflictSet(occupancy());
       const mineBad = p.shape.some(s=>bad.has((p.at.r+s.dr)+","+(p.at.c+s.dc)));
@@ -798,24 +800,30 @@ function fitCell(){
     const px = Math.max(29, Math.min(50, widthCell));
     root.style.setProperty("--cell", px + "px");
     root.style.setProperty("--tray-cell", "21px");
+    document.body.classList.remove("scroll-locked");
     return;
   }
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const applyLock = total => document.body.classList.toggle("scroll-locked", total <= vh);
   const headerEl = document.querySelector("header.top");
   const hudEl = document.querySelector(".hud");
   const titleEl = document.querySelector(".tray-title");
   const fixed = 18 + (headerEl ? headerEl.offsetHeight : 24) + (hudEl ? hudEl.offsetHeight : 64)
               + 6 + 8 + 10 + (titleEl ? titleEl.offsetHeight : 18) + 6 + 12;
   const trayInnerW = contentW - 22;
-  let chosen = null;
+  let chosen = null, chosenTotal = null;
   for(let cell = Math.min(50, widthCell); cell >= 23; cell--){
     const trayCell = Math.max(11, Math.min(21, Math.round(cell * 0.48)));
     const total = fixed + cell * 9 + 14 + trayHeightEstimate(G.initialTray, trayCell, trayInnerW);
-    if(total <= vh){ chosen = {cell, trayCell}; break; }
+    if(total <= vh){ chosen = {cell, trayCell}; chosenTotal = total; break; }
   }
-  if(!chosen) chosen = {cell:23, trayCell:11};
+  if(!chosen){
+    chosen = {cell:23, trayCell:11};
+    chosenTotal = fixed + 23 * 9 + 14 + trayHeightEstimate(G.initialTray, 11, trayInnerW);
+  }
   root.style.setProperty("--cell", chosen.cell + "px");
   root.style.setProperty("--tray-cell", chosen.trayCell + "px");
+  applyLock(chosenTotal);
 }
 window.addEventListener("resize", fitCell);
 fitCell();
