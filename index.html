@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lotus Blocks — 試手 v0.4.1</title>
+<title>Lotus Blocks — 試玩版 v0.4.2</title>
 <style>
   :root{
     --ink:#2e3a34; --sage:#476b5d; --sage-d:#38564b; --petal:#d96c8a; --petal-soft:#f7e0e8;
@@ -124,35 +124,36 @@
 <div class="wrap">
   <header class="top">
     <h1>Lotus Blocks</h1>
-    <div class="sub">試 手 v0.4.1 · PLAYTEST</div>
+    <div class="sub" id="headerSub">試玩版 v0.4.2 · PLAYTEST</div>
   </header>
 
   <!-- ======== MENU ======== -->
   <section id="menu" class="card">
-    <p style="line-height:1.7">一盤完整數獨解答切成一整套方塊，將所有方塊放返入 9×9，令每一行、每一列、每一宮都係 1–9 唔重複，就算完成。深紅色係<b>定版件</b>（鎖死，唔使理）；粉紅色方塊喺下面件盤，拖上去放。每一盤都係由種子即時生成——同一個種子，永遠同一盤。</p>
+    <div style="text-align:right;margin-bottom:2px"><button class="hbtn" id="langBtn" type="button">English</button></div>
+    <p style="line-height:1.7" id="menuIntro">一盤完整數獨答案切成好多件方塊。將方塊全部拖返入 9×9 格，令每行、每列、每個 3×3 宮都係 1–9 唔重複，就完成。深紅色係<b>定版件</b>：開局已經放好、鎖死，唔使理。粉紅色方塊喺下面件盤，拖上去放。上面「<b>Hints</b>」掣會話你知下一件放落邊度會撞數。每盤由種子（即係盤號）生成，同一個種子永遠同一盤。</p>
     <div id="diffList"></div>
     <div class="seed-modes">
       <button class="seed-chip" data-mode="daily">📅 每日盤</button>
       <button class="seed-chip" data-mode="random">🎲 隨機</button>
       <button class="seed-chip" data-mode="custom">✍️ 自訂種子</button>
     </div>
-    <input id="seedInput" class="seed-input hidden" placeholder="輸入種子，例如 LB-X-1（同種子＝同盤）">
+    <input id="seedInput" class="seed-input hidden" placeholder="輸入種子，例如 LB-X-1">
     <p class="note" id="seedNote"></p>
     <label class="timer-row">
       <input type="checkbox" id="timerChk">
       <div>
-        <div class="t1">開限時（倒數）</div>
-        <div class="t2">時限 ＝ 待放件數 × 30 秒。預設：簡單／普通關、困難開；任何難度都可以自己開關。</div>
+        <div class="t1" id="timerLabel">開限時（倒數）</div>
+        <div class="t2" id="timerDesc">時限 ＝ 要放嘅方塊數目 × 30 秒。預設：簡單、普通唔開，困難開；任何難度都可以自己揀開定唔開。</div>
       </div>
     </label>
     <button class="start-btn" id="startBtn">開始</button>
-    <p class="note">試手版：廣告位係假掣，會扮播 1 秒廣告。撞數預覽改為逐件啟用：拖方塊之前撳遊戲上方嘅「撞數預覽」掣，下一件先會顯示撞數並扣 1 次（簡單 8 次、普通／困難 5 次）；冇啟用嗰陣只會提示有冇疊格。用光之後同一個掣會變成「預覽 +2」，撳就睇廣告加 2 次（每局最多買 2 次，買完即刻自動啟用下一件）；提早買唔提供。放錯唔會即刻趕你走——撞數嘅格會標紅，鬆手嗰刻有撞數先計一次試錯，上限 3 次，之後可以睇廣告復活（每局最多 2 次；買預覽同復活分開計）。已放嘅方塊拖出盤面任何位置鬆手就可以收回（唔退預覽、唔取消試錯）。</p>
+    <p class="note" id="howtoNote">試玩版：廣告係假嘅，只會扮播 1 秒。「Hints」掣喺遊戲上方。拖方塊之前撳一下，拖下一件時就會見到邊格撞數，放低先扣 1 次（簡單 8 次，普通／困難 5 次）。再撳一下就會取消。冇撳就只會提示有冇疊住其他格。用晒之後，同一粒掣會變成「Hints +2」：睇段廣告就加 2 次，每局最多買 2 次，買完自動幫下一件開定。未用晒唔可以買。放錯唔會即刻輸：撞數嘅格會變紅，鬆手時有撞數就計 1 次試錯，最多 3 次。試錯用完（或者時間到）可以睇廣告復活，即係多 1 次試錯機會，有開限時再加 60 秒。每局最多 2 次，同買 Hints 分開計。已放嘅方塊拖出盤面，喺邊度鬆手都可以收返；用咗嘅 Hints 唔退，已計嘅試錯唔取消。</p>
     <div class="rec-row">
-      <span class="chip">📒 試玩記錄 <b id="recCount">0</b> 盤</span>
+      <span class="chip" id="recCountChip">📒 試玩記錄 <b>0</b> 盤</span>
       <button class="hbtn" id="recExportBtn">📋 匯出全部記錄</button>
       <button class="hbtn" id="recClearBtn">🗑 清除記錄</button>
     </div>
-    <p class="note">每盤完成、結束或者中途放棄都會自動記錄喺呢部機（唔會上傳），試玩完撳「匯出全部記錄」一次過複製貼返俾開發者。記錄只存喺呢個瀏覽器，清瀏覽器資料或者用私密模式會冇咗。</p>
+    <p class="note" id="recNote">每盤完成、輸咗或者中途放棄，都會自動記錄喺呢部機，唔會上傳。試玩完撳「匯出全部記錄」，一次過複製，再貼返俾開發者。記錄只存喺呢個瀏覽器，清瀏覽器資料或者用私密模式就會冇咗。</p>
   </section>
 
   <!-- ======== GAME ======== -->
@@ -160,10 +161,10 @@
     <div class="hud">
       <div class="grp">
         <span class="chip" id="hudDiff">—</span>
-        <span class="chip">種子 <b id="hudSeed">—</b></span>
+        <span class="chip" id="hudSeedChip">種子 <b>—</b></span>
         <span class="chip" id="hudTime">⏱ <b>00:00</b></span>
         <span class="chip err" id="hudErr">試錯 <b>0</b>/3</span>
-        <button class="chip chip-btn" id="hudPv" type="button" aria-pressed="false" title="撞數預覽掣">撞數預覽 <b>0</b></button>
+        <button class="chip chip-btn" id="hudPv" type="button" aria-pressed="false" title="Hints 掣：撳一下，下一件會顯示邊格撞數；再撳一下取消">Hints <b>0</b></button>
       </div>
       <div class="grp">
         <button class="hbtn" id="pauseBtn">⏸ 暫停</button>
@@ -173,18 +174,18 @@
     </div>
     <div id="toast"></div>
     <div class="board-wrap"><div id="board"></div></div>
-    <div class="tray-title">件 盤（拖方塊上盤；拖出盤面即可收回）</div>
+    <div class="tray-title" id="trayTitle">件盤（拖上盤面；拖出盤面就收返）</div>
     <div id="tray"></div>
   </section>
 
-  <footer>Lotus Blocks 試手 v0.4.1 — 驗證手感用，唔係完成品。<br>每盤成績會自動記錄，喺主頁撳「匯出全部記錄」一次過貼返俾開發者。</footer>
+  <footer id="pageFooter">Lotus Blocks 試玩版 v0.4.2：用嚟試手感，未係完成品。<br>每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。</footer>
 </div>
 
 <!-- ======== PAUSE ======== -->
 <div class="overlay" id="pauseOv">
   <div class="panel">
-    <h2>暫停中</h2>
-    <p>盤面已遮閉。</p>
+    <h2 id="pauseTitle">暫停中</h2>
+    <p id="pauseText">盤面已經遮住。</p>
     <div class="big-time" id="pauseTime">00:00</div>
     <button class="pbtn primary" id="resumeBtn">繼續</button>
     <button class="pbtn" id="pauseHomeBtn">返主頁</button>
@@ -196,7 +197,7 @@
   <div class="panel">
     <h2 id="reviveTitle">試錯用完</h2>
     <p id="reviveText"></p>
-    <button class="pbtn primary" id="reviveBtn">📺 睇廣告復活（+1 命）</button>
+    <button class="pbtn primary" id="reviveBtn">📺 睇廣告復活（+1 次機會）</button>
     <button class="pbtn" id="reviveRestartBtn">重新開始呢盤</button>
     <button class="pbtn" id="reviveHomeBtn">返主頁</button>
   </div>
@@ -206,19 +207,19 @@
 <div class="overlay" id="doneOv">
   <div class="panel">
     <div class="bloom" id="bloom"></div>
-    <h2>完成！朵蓮開咗</h2>
+    <h2 id="doneTitle">完成！朵蓮花開咗</h2>
     <div class="stats" id="doneStats"></div>
     <button class="pbtn primary" id="copyBtn">📋 複製本場成績</button>
-    <button class="pbtn" id="againBtn">再來一盤（同一盤）</button>
-    <button class="pbtn" id="doneHomeBtn">返主頁轉難度</button>
+    <button class="pbtn" id="againBtn">再玩同一盤</button>
+    <button class="pbtn" id="doneHomeBtn">返主頁揀過難度</button>
   </div>
 </div>
 
 <!-- ======== FAKE AD ======== -->
 <div class="overlay" id="adOv">
   <div class="panel">
-    <h2>廣告播放中…</h2>
-    <p>（試手版假廣告，真版本會接廣告 SDK）</p>
+    <h2 id="adTitle">廣告播放中…</h2>
+    <p id="adText">（試玩版假廣告，正式版先會播真廣告）</p>
     <div class="big-time" id="adCount">1</div>
   </div>
 </div>
@@ -228,13 +229,178 @@
 <script src="generator.js"></script>
 <script>
 const BOARDS = [{"seed": "LB-E-20261023", "difficulty": "easy", "solution": [5, 2, 8, 6, 1, 7, 9, 4, 3, 3, 6, 1, 4, 8, 9, 2, 5, 7, 4, 9, 7, 5, 3, 2, 8, 6, 1, 9, 5, 4, 7, 6, 3, 1, 8, 2, 8, 7, 6, 1, 2, 5, 4, 3, 9, 2, 1, 3, 9, 4, 8, 6, 7, 5, 1, 8, 5, 2, 7, 4, 3, 9, 6, 7, 4, 2, 3, 9, 6, 5, 1, 8, 6, 3, 9, 8, 5, 1, 7, 2, 4], "pieces": [{"cells": [[4, 5], [4, 6], [5, 3], [5, 4], [5, 5], [6, 3]], "vals": [5, 4, 9, 4, 8, 2], "given": false}, {"cells": [[3, 7], [4, 7], [5, 6], [5, 7], [6, 6], [6, 7]], "vals": [8, 3, 6, 7, 3, 9], "given": true}, {"cells": [[6, 8], [7, 6], [7, 7], [7, 8], [8, 6], [8, 7], [8, 8]], "vals": [6, 5, 1, 8, 7, 2, 4], "given": false}, {"cells": [[0, 3], [0, 4], [0, 5], [1, 3], [1, 4], [1, 5], [2, 4]], "vals": [6, 1, 7, 4, 8, 9, 3], "given": false}, {"cells": [[7, 2], [7, 3], [8, 2], [8, 3], [8, 4], [8, 5]], "vals": [2, 3, 9, 8, 5, 1], "given": false}, {"cells": [[4, 2], [5, 1], [5, 2], [6, 1], [6, 2]], "vals": [6, 1, 3, 8, 5], "given": true}, {"cells": [[6, 4], [6, 5], [7, 4], [7, 5]], "vals": [7, 4, 9, 6], "given": true}, {"cells": [[0, 6], [0, 7], [0, 8], [1, 6], [1, 7], [1, 8]], "vals": [9, 4, 3, 2, 5, 7], "given": false}, {"cells": [[6, 0], [7, 0], [7, 1], [8, 0], [8, 1]], "vals": [1, 7, 4, 6, 3], "given": false}, {"cells": [[2, 3], [3, 1], [3, 2], [3, 3], [4, 3], [4, 4]], "vals": [5, 5, 4, 7, 1, 2], "given": false}, {"cells": [[2, 5], [2, 6], [2, 7], [2, 8], [3, 4], [3, 5], [3, 6]], "vals": [2, 8, 6, 1, 6, 3, 1], "given": true}, {"cells": [[3, 8], [4, 8], [5, 8]], "vals": [2, 9, 5], "given": false}, {"cells": [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [2, 1], [3, 0]], "vals": [5, 2, 3, 6, 4, 9, 9], "given": false}, {"cells": [[4, 0], [4, 1], [5, 0]], "vals": [8, 7, 2], "given": false}, {"cells": [[0, 2], [1, 2], [2, 2]], "vals": [8, 1, 7], "given": true}], "stats": {"totalPieces": 15, "givenPieces": 5, "givenCells": 25, "trayPieces": 10, "trayCells": 56, "avgTraySize": 5.6, "minSize": 3, "maxSize": 7}}, {"seed": "LB-N-20261023", "difficulty": "normal", "solution": [8, 7, 6, 5, 2, 1, 9, 4, 3, 3, 4, 1, 8, 6, 9, 2, 5, 7, 9, 2, 5, 4, 7, 3, 6, 1, 8, 7, 3, 8, 1, 5, 2, 4, 6, 9, 1, 5, 9, 6, 8, 4, 7, 3, 2, 4, 6, 2, 9, 3, 7, 5, 8, 1, 6, 9, 4, 2, 1, 8, 3, 7, 5, 2, 8, 3, 7, 4, 5, 1, 9, 6, 5, 1, 7, 3, 9, 6, 8, 2, 4], "pieces": [{"cells": [[5, 1], [6, 1], [7, 1], [8, 1]], "vals": [6, 9, 8, 1], "given": false}, {"cells": [[0, 8], [1, 8], [2, 7], [2, 8]], "vals": [3, 7, 1, 8], "given": false}, {"cells": [[5, 5], [5, 6], [6, 4], [6, 5], [6, 6], [7, 5], [7, 6], [8, 5]], "vals": [7, 5, 1, 8, 3, 5, 1, 6], "given": false}, {"cells": [[0, 4], [0, 5], [1, 3], [1, 4]], "vals": [2, 1, 8, 6], "given": false}, {"cells": [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2], [2, 2]], "vals": [8, 7, 6, 5, 4, 1, 5], "given": true}, {"cells": [[5, 2], [5, 3], [5, 4], [6, 3], [7, 3]], "vals": [2, 9, 3, 2, 7], "given": false}, {"cells": [[6, 7], [7, 7], [8, 6], [8, 7]], "vals": [7, 9, 8, 2], "given": false}, {"cells": [[6, 2], [7, 2], [7, 4], [8, 2], [8, 3], [8, 4]], "vals": [4, 3, 4, 7, 3, 9], "given": true}, {"cells": [[2, 3], [3, 2], [3, 3], [3, 4], [3, 5]], "vals": [4, 8, 1, 5, 2], "given": false}, {"cells": [[3, 8], [4, 8], [5, 7], [5, 8], [6, 8], [7, 8], [8, 8]], "vals": [9, 2, 8, 1, 5, 6, 4], "given": true}, {"cells": [[3, 6], [3, 7], [4, 6], [4, 7]], "vals": [4, 6, 7, 3], "given": true}, {"cells": [[3, 0], [3, 1], [4, 0], [4, 1], [4, 2]], "vals": [7, 3, 1, 5, 9], "given": false}, {"cells": [[1, 5], [2, 4], [2, 5], [2, 6]], "vals": [9, 7, 3, 6], "given": false}, {"cells": [[0, 6], [0, 7], [1, 6], [1, 7]], "vals": [9, 4, 2, 5], "given": false}, {"cells": [[5, 0], [6, 0], [7, 0], [8, 0]], "vals": [4, 6, 2, 5], "given": false}, {"cells": [[1, 0], [2, 0], [2, 1]], "vals": [3, 9, 2], "given": true}, {"cells": [[4, 3], [4, 4], [4, 5]], "vals": [6, 8, 4], "given": false}], "stats": {"totalPieces": 17, "givenPieces": 5, "givenCells": 27, "trayPieces": 12, "trayCells": 54, "avgTraySize": 4.5, "minSize": 3, "maxSize": 8}}, {"seed": "LB-H-20261023", "difficulty": "hard", "solution": [3, 8, 2, 9, 6, 1, 7, 4, 5, 7, 1, 9, 5, 2, 4, 8, 3, 6, 6, 4, 5, 8, 3, 7, 1, 2, 9, 9, 5, 3, 7, 4, 6, 2, 8, 1, 1, 6, 7, 3, 8, 2, 9, 5, 4, 8, 2, 4, 1, 5, 9, 3, 6, 7, 5, 7, 8, 4, 9, 3, 6, 1, 2, 2, 3, 1, 6, 7, 5, 4, 9, 8, 4, 9, 6, 2, 1, 8, 5, 7, 3], "pieces": [{"cells": [[8, 4], [8, 5], [8, 6]], "vals": [1, 8, 5], "given": false}, {"cells": [[2, 6], [3, 6], [3, 7], [4, 6], [4, 7]], "vals": [1, 2, 8, 9, 5], "given": false}, {"cells": [[1, 3], [1, 4], [1, 5]], "vals": [5, 2, 4], "given": false}, {"cells": [[1, 2], [2, 2], [2, 3], [3, 2], [3, 3], [4, 3]], "vals": [9, 5, 8, 3, 7, 3], "given": false}, {"cells": [[3, 1], [4, 1], [5, 1]], "vals": [5, 6, 2], "given": false}, {"cells": [[0, 0], [0, 1], [1, 0], [1, 1], [2, 1]], "vals": [3, 8, 7, 1, 4], "given": true}, {"cells": [[6, 0], [7, 0], [8, 0]], "vals": [5, 2, 4], "given": false}, {"cells": [[0, 7], [1, 7], [2, 7]], "vals": [4, 3, 2], "given": false}, {"cells": [[7, 2], [8, 2], [8, 3]], "vals": [1, 6, 2], "given": false}, {"cells": [[2, 0], [3, 0], [4, 0], [5, 0]], "vals": [6, 9, 1, 8], "given": false}, {"cells": [[4, 8], [5, 7], [5, 8], [6, 7], [6, 8]], "vals": [4, 6, 7, 1, 2], "given": false}, {"cells": [[5, 4], [6, 4], [7, 4], [7, 5]], "vals": [5, 9, 7, 5], "given": false}, {"cells": [[5, 6], [6, 6], [7, 6], [7, 7], [7, 8], [8, 7], [8, 8]], "vals": [3, 6, 4, 9, 8, 7, 3], "given": false}, {"cells": [[4, 2], [5, 2], [5, 3], [6, 3], [7, 3]], "vals": [7, 4, 1, 4, 6], "given": false}, {"cells": [[4, 4], [4, 5], [5, 5], [6, 5]], "vals": [8, 2, 9, 3], "given": false}, {"cells": [[0, 2], [0, 3], [0, 4]], "vals": [2, 9, 6], "given": false}, {"cells": [[6, 1], [6, 2], [7, 1], [8, 1]], "vals": [7, 8, 3, 9], "given": false}, {"cells": [[0, 8], [1, 8], [2, 8], [3, 8]], "vals": [5, 6, 9, 1], "given": false}, {"cells": [[0, 5], [0, 6], [1, 6]], "vals": [1, 7, 8], "given": false}, {"cells": [[2, 4], [2, 5], [3, 4], [3, 5]], "vals": [3, 7, 4, 6], "given": false}], "stats": {"totalPieces": 20, "givenPieces": 1, "givenCells": 5, "trayPieces": 19, "trayCells": 76, "avgTraySize": 4.0, "minSize": 3, "maxSize": 7}}];
+/* 記錄用中文難度名（resultText／recordLine），介面顯示用 T("diff-…-label") */
 const DIFF_LABEL = {easy:"簡單", normal:"普通", hard:"困難"};
 const PREVIEW_FREE = {easy:8, normal:5, hard:5};
-const DIFF_BLURB = {
-  easy:"定版件大、待放件細而多（約 13 件）· 免費撞數預覽 8 次（逐件啟用）",
-  normal:"定版中等、中等件 · 免費撞數預覽 5 次（逐件啟用）",
-  hard:"定版少（四角有錨）、細件為主 · 免費撞數預覽 5 次（逐件啟用）"
+/* v0.4.2：全部對外文字走字串表（轉交箱 #13 對照表＋heiman 8 項決定）。
+   DIFF_LABEL 留做記錄用中文（複製成績／匯出記錄保留舊字，方便同 v0.2–v0.4 對比）；介面顯示一律用 T()。
+   記錄格式（recordLine／export header／resultText 欄位名）不動，只升版號。 */
+const STR = {
+ "zh": {
+  "page-title": "Lotus Blocks — 試玩版 v0.4.2",
+  "header-sub": "試玩版 v0.4.2 · PLAYTEST",
+  "menu-intro": "一盤完整數獨答案切成好多件方塊。將方塊全部拖返入 9×9 格，令每行、每列、每個 3×3 宮都係 1–9 唔重複，就完成。深紅色係<b>定版件</b>：開局已經放好、鎖死，唔使理。粉紅色方塊喺下面件盤，拖上去放。上面「<b>Hints</b>」掣會話你知下一件放落邊度會撞數。每盤由種子（即係盤號）生成，同一個種子永遠同一盤。",
+  "diff-easy-label": "簡單",
+  "diff-normal-label": "普通",
+  "diff-hard-label": "困難",
+  "diff-easy-blurb": "定版件大，要放嘅方塊細而多（約 13 件）· 免費 Hints 8 次",
+  "diff-normal-blurb": "定版件中等，方塊中等大細 · 免費 Hints 5 次",
+  "diff-hard-blurb": "定版件少，但四個角都有；方塊以細件為主 · 免費 Hints 5 次",
+  "seed-chip-daily": "📅 每日盤",
+  "seed-chip-random": "🎲 隨機",
+  "seed-chip-custom": "✍️ 自訂種子",
+  "seed-note-daily": "每日盤：用今日日期做種子，人人玩同一盤，聽日自動換過新一盤。",
+  "seed-note-random": "隨機：即刻出一個新種子，呢盤得你有。抄低種子，就可以俾朋友玩同一盤。",
+  "seed-note-custom": "自訂種子：自己輸入種子。同一個種子永遠出同一盤，朋友輸入同一個種子就玩到同一盤。",
+  "seed-input-placeholder": "輸入種子，例如 LB-X-1",
+  "timer-label": "開限時（倒數）",
+  "timer-desc": "時限 ＝ 要放嘅方塊數目 × 30 秒。預設：簡單、普通唔開，困難開；任何難度都可以自己揀開定唔開。",
+  "start-btn": "開始",
+  "howto-note": "試玩版：廣告係假嘅，只會扮播 1 秒。「Hints」掣喺遊戲上方。拖方塊之前撳一下，拖下一件時就會見到邊格撞數，放低先扣 1 次（簡單 8 次，普通／困難 5 次）。再撳一下就會取消。冇撳就只會提示有冇疊住其他格。用晒之後，同一粒掣會變成「Hints +2」：睇段廣告就加 2 次，每局最多買 2 次，買完自動幫下一件開定。未用晒唔可以買。放錯唔會即刻輸：撞數嘅格會變紅，鬆手時有撞數就計 1 次試錯，最多 3 次。試錯用完（或者時間到）可以睇廣告復活，即係多 1 次試錯機會，有開限時再加 60 秒。每局最多 2 次，同買 Hints 分開計。已放嘅方塊拖出盤面，喺邊度鬆手都可以收返；用咗嘅 Hints 唔退，已計嘅試錯唔取消。",
+  "rec-count": "📒 試玩記錄 {n} 盤",
+  "rec-export-btn": "📋 匯出全部記錄",
+  "rec-clear-btn": "🗑 清除記錄",
+  "rec-note": "每盤完成、輸咗或者中途放棄，都會自動記錄喺呢部機，唔會上傳。試玩完撳「匯出全部記錄」，一次過複製，再貼返俾開發者。記錄只存喺呢個瀏覽器，清瀏覽器資料或者用私密模式就會冇咗。",
+  "rec-export-empty": "（未有記錄）",
+  "rec-export-ok": "✓ 已複製，貼返俾開發者啦",
+  "rec-export-fail": "複製唔到，請再試",
+  "rec-clear-confirm": "清除全部試玩記錄？清咗就冇得再匯出。",
+  "hud-seed": "種子 {seed}",
+  "hud-time": "⏱ {time}",
+  "hud-time-countdown": "⏳ 剩 {time}",
+  "hud-mistakes": "試錯 {n}/{max}",
+  "hud-hints-ready": "Hints {n}",
+  "hud-hints-on": "Hints {n} · 開咗",
+  "hud-hints-buy": "📺 Hints +2（{k}/2）",
+  "hud-hints-out": "Hints 已用完",
+  "hud-hints-tooltip": "Hints 掣：撳一下，下一件會顯示邊格撞數；再撳一下取消",
+  "hud-pause": "⏸ 暫停",
+  "hud-restart": "↺ 重開",
+  "hud-home": "主頁",
+  "tray-title": "件盤（拖上盤面；拖出盤面就收返）",
+  "tray-empty": "件盤冇晒方塊。盤面放滿未？",
+  "pause-title": "暫停中",
+  "pause-text": "盤面已經遮住。",
+  "pause-time-left": "剩 {time}",
+  "pause-resume": "繼續",
+  "pause-home": "返主頁",
+  "revive-title-mistakes": "試錯用完",
+  "revive-title-time": "時間到",
+  "revive-text-mistakes": "你已經試錯 {n} 次。睇段廣告復活，就可以多 1 次試錯機會{bonus}。每局最多復活 2 次，而家用咗 {r} 次。",
+  "revive-text-bonus": "，仲加 60 秒",
+  "revive-text-time": "時間用完。睇段廣告復活，就可以加 60 秒，再多 1 次試錯機會。每局最多復活 2 次，而家用咗 {r} 次。",
+  "gameover-text-mistakes": "試錯 {n} 次，復活都用晒（2/2）。呢盤要重新開始，或者返主頁揀過難度。",
+  "gameover-text-time": "時間用完，復活都用晒（2/2）。呢盤要重新開始，或者返主頁揀過難度。",
+  "revive-btn": "📺 睇廣告復活（+1 次機會）",
+  "revive-btn-timer": "📺 睇廣告復活（+1 次機會 +60 秒）",
+  "revive-restart": "重新開始呢盤",
+  "revive-home": "返主頁",
+  "done-title": "完成！朵蓮花開咗",
+  "done-stat-diff": "難度",
+  "done-stat-seed": "種子",
+  "done-stat-time": "用時",
+  "done-stat-mistakes": "試錯",
+  "done-stat-revives": "復活",
+  "done-stat-recycles": "收回",
+  "done-stat-hints-bought": "Hints 購買次數",
+  "done-stat-timer": "限時",
+  "done-val-count": "{n} 次",
+  "done-val-timer-on": "有開（限 {time}）",
+  "done-val-timer-off": "冇開",
+  "done-copy": "📋 複製本場成績",
+  "done-copy-ok": "✓ 已複製，去貼低啦",
+  "done-again": "再玩同一盤",
+  "done-home": "返主頁揀過難度",
+  "ad-title": "廣告播放中…",
+  "ad-text": "（試玩版假廣告，正式版先會播真廣告）",
+  "footer": "Lotus Blocks 試玩版 v0.4.2：用嚟試手感，未係完成品。每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。",
+  "lang-toggle": "English"
+ },
+ "en": {
+  "page-title": "Lotus Blocks — Playtest v0.4.2",
+  "header-sub": "Playtest v0.4.2",
+  "menu-intro": "A full sudoku solution is cut into pieces. Drag every piece back into the 9×9 grid so each row, column and 3×3 box has 1–9 with no repeats. Dark red pieces are <b>locked</b>: they start in place and can't move, so leave them. Pink pieces wait in the tray below. Drag them up. The <b>Hints</b> button at the top shows where your next piece would clash. Each puzzle comes from a seed (its puzzle code), and the same seed always gives the same puzzle.",
+  "diff-easy-label": "Easy",
+  "diff-normal-label": "Normal",
+  "diff-hard-label": "Hard",
+  "diff-easy-blurb": "Big locked pieces, lots of small pieces to place (about 13) · 8 free Hints",
+  "diff-normal-blurb": "Medium locked pieces, medium-size pieces · 5 free Hints",
+  "diff-hard-blurb": "Few locked pieces (all 4 corners covered), mostly small pieces · 5 free Hints",
+  "seed-chip-daily": "📅 Daily",
+  "seed-chip-random": "🎲 Random",
+  "seed-chip-custom": "✍️ Custom seed",
+  "seed-note-daily": "Daily: today's date is the seed, so everyone plays the same puzzle. A new one arrives tomorrow.",
+  "seed-note-random": "Random: a brand-new seed just for you. Note it down to share the same puzzle with friends.",
+  "seed-note-custom": "Custom seed: type in any seed. The same seed always gives the same puzzle, so friends can play yours.",
+  "seed-input-placeholder": "Enter a seed, e.g. LB-X-1",
+  "timer-label": "Timer (countdown)",
+  "timer-desc": "Time limit = pieces to place × 30 sec. Off by default on Easy and Normal, on for Hard. You can switch it on or off at any level.",
+  "start-btn": "Start",
+  "howto-note": "Playtest build: ads are fake. They just pretend to play for 1 second. The Hints button is at the top. Tap it before you drag, and your next piece will show which cells clash. A Hint is only used when you drop the piece. Free Hints: 8 on Easy, 5 on Normal and Hard. Tap again to cancel. Without a Hint, dragging only shows whether a piece overlaps others. When you run out, the same button turns into \"Hints +2\". Watch an ad to get 2 more, up to 2 times per game. Your next piece gets a Hint straight away. You can't buy more until you run out. A wrong drop won't end the game. Clashing cells turn red, and each drop with a clash counts as 1 mistake. You can make 3. Out of mistakes (or time)? Watch an ad to revive: you get 1 more mistake, plus 60 sec if the timer is on. Up to 2 revives per game, counted separately from buying Hints. To take back a placed piece, drag it off the board and let go anywhere. Used Hints aren't refunded, and mistakes already counted stay.",
+  "rec-count": "📒 {n} games logged",
+  "rec-export-btn": "📋 Export all",
+  "rec-clear-btn": "🗑 Clear log",
+  "rec-note": "Every game you finish, lose or quit is saved on this device only. Nothing is uploaded. When you're done, tap \"Export all\" to copy everything, then paste it to the developer. The log lives in this browser only. Clearing browser data or using private mode will wipe it.",
+  "rec-export-empty": "(Nothing logged yet)",
+  "rec-export-ok": "✓ Copied! Paste it to the developer",
+  "rec-export-fail": "Couldn't copy. Please try again",
+  "rec-clear-confirm": "Clear the whole log? You won't be able to export it afterwards.",
+  "hud-seed": "Seed {seed}",
+  "hud-time": "⏱ {time}",
+  "hud-time-countdown": "⏳ {time} left",
+  "hud-mistakes": "Mistakes {n}/{max}",
+  "hud-hints-ready": "Hints {n}",
+  "hud-hints-on": "Hints {n} · ON",
+  "hud-hints-buy": "📺 Hints +2 ({k}/2)",
+  "hud-hints-out": "No Hints left",
+  "hud-hints-tooltip": "Hints: tap to see where your next piece clashes; tap again to cancel",
+  "hud-pause": "⏸ Pause",
+  "hud-restart": "↺ Restart",
+  "hud-home": "Home",
+  "tray-title": "Pieces (drag onto the board, drag off to take back)",
+  "tray-empty": "Tray's empty. Is the board full?",
+  "pause-title": "Paused",
+  "pause-text": "The board is hidden.",
+  "pause-time-left": "{time} left",
+  "pause-resume": "Resume",
+  "pause-home": "Home",
+  "revive-title-mistakes": "Out of mistakes",
+  "revive-title-time": "Time's up",
+  "revive-text-mistakes": "You've made {n} mistakes. Watch an ad to revive and get 1 more{bonus}. Up to 2 revives per game ({r} used).",
+  "revive-text-bonus": ", plus 60 sec",
+  "revive-text-time": "Time ran out. Watch an ad to revive: +60 sec and 1 more mistake. Up to 2 revives per game ({r} used).",
+  "gameover-text-mistakes": "{n} mistakes and no revives left (2/2). Restart this puzzle, or go home to pick another level.",
+  "gameover-text-time": "Time ran out and no revives left (2/2). Restart this puzzle, or go home to pick another level.",
+  "revive-btn": "📺 Watch ad to revive (+1 chance)",
+  "revive-btn-timer": "📺 Watch ad to revive (+1 chance, +60s)",
+  "revive-restart": "Restart this puzzle",
+  "revive-home": "Home",
+  "done-title": "Solved! Your lotus is in bloom",
+  "done-stat-diff": "Level",
+  "done-stat-seed": "Seed",
+  "done-stat-time": "Time",
+  "done-stat-mistakes": "Mistakes",
+  "done-stat-revives": "Revives",
+  "done-stat-recycles": "Taken back",
+  "done-stat-hints-bought": "Hints bought",
+  "done-stat-timer": "Timer",
+  "done-val-count": "{n}",
+  "done-val-timer-on": "On ({time})",
+  "done-val-timer-off": "Off",
+  "done-copy": "📋 Copy result",
+  "done-copy-ok": "✓ Copied! Go paste it",
+  "done-again": "Play this puzzle again",
+  "done-home": "Home (pick a level)",
+  "ad-title": "Ad playing…",
+  "ad-text": "(Fake ad for the playtest. The full game will show real ads.)",
+  "footer": "Lotus Blocks Playtest v0.4.2, made for testing the feel. It's not the finished game. Every game is logged. Tap \"Export all\" on the home screen to copy them all for the developer.",
+  "lang-toggle": "中文"
+ }
 };
+let lang = "zh";
+try{ lang = localStorage.getItem("lotusblocks.lang") || "zh"; }catch(e){}
+if(lang !== "en") lang = "zh";
+function T(k){ return STR[lang][k]; }
 const DIFF_DESC = {
   easy: b=>`定版 ${b.stats.givenPieces} 件（${b.stats.givenCells} 格，每宮都有）· 待放 ${b.stats.trayPieces} 件，大件為主（平均 ${b.stats.avgTraySize} 格）`,
   normal: b=>`定版 ${b.stats.givenPieces} 件（${b.stats.givenCells} 格）· 待放 ${b.stats.trayPieces} 件（平均 ${b.stats.avgTraySize} 格）`,
@@ -252,25 +418,20 @@ function buildMenu(){
   for(const diff of ["easy","normal","hard"]){
     const btn = document.createElement("button");
     btn.className = "diff-btn" + (diff===selDiff ? " sel" : "");
-    btn.innerHTML = `<b>${DIFF_LABEL[diff]}</b><span>${DIFF_BLURB[diff]}</span>`;
+    btn.innerHTML = `<b>${T("diff-"+diff+"-label")}</b><span>${T("diff-"+diff+"-blurb")}</span>`;
     btn.onclick = ()=>{ selDiff = diff; $("timerChk").checked = (diff==="hard"); buildMenu(); };
     list.appendChild(btn);
   }
   $("timerChk").checked = (selDiff==="hard");
 }
 let seedMode = "daily";
-const SEED_NOTE = {
-  daily:"每日盤：用今日日期做種子，人人同一盤；聽日自動換新盤。",
-  random:"隨機盤：即刻生成一個新種子，呢盤只有你有；抄低種子就可以分享返同一盤。",
-  custom:"自訂種子：同一個種子永遠出同一盤——朋友入返同一個種子，就玩到同一盤。",
-};
 function buildSeedRow(){
   document.querySelectorAll(".seed-chip").forEach(ch=>{
     ch.classList.toggle("sel", ch.dataset.mode===seedMode);
     ch.onclick = ()=>{ seedMode = ch.dataset.mode; buildSeedRow(); };
   });
   $("seedInput").classList.toggle("hidden", seedMode!=="custom");
-  $("seedNote").textContent = SEED_NOTE[seedMode];
+  $("seedNote").textContent = T("seed-note-"+seedMode);
 }
 function todaySeed(diff){
   const d = new Date(), p = n=>String(n).padStart(2,"0");
@@ -370,7 +531,7 @@ function renderBoard(){
 function renderTray(){
   const tray = $("tray"); tray.innerHTML = "";
   const left = G.pieces.filter(p=>!p.given && !p.placed && !p.dragging);
-  if(!left.length){ tray.innerHTML = '<div class="tray-empty">件盤清空——盤面放滿未？</div>'; return; }
+  if(!left.length){ tray.innerHTML = '<div class="tray-empty">' + T("tray-empty") + '</div>'; return; }
   for(const p of left){
     const el = document.createElement("div");
     el.className = "tray-piece"; el.dataset.pid = p.id;
@@ -389,26 +550,27 @@ function renderTray(){
   }
 }
 function renderHud(){
-  $("hudDiff").textContent = DIFF_LABEL[G.mdiff];
-  $("hudSeed").textContent = G.board.seed;
+  $("hudDiff").textContent = T("diff-"+G.mdiff+"-label");
+  $("hudSeedChip").innerHTML = T("hud-seed").replace("{seed}", "<b>" + G.board.seed + "</b>");
   const shown = G.timerOn ? (G.limit - G.elapsed) : G.elapsed;
-  $("hudTime").innerHTML = (G.timerOn ? "⏳ 剩 " : "⏱ ") + "<b>" + fmt(shown) + "</b>";
+  $("hudTime").innerHTML = (G.timerOn ? T("hud-time-countdown") : T("hud-time")).replace("{time}", "<b>" + fmt(shown) + "</b>");
   $("hudTime").style.color = (G.timerOn && shown <= 60 && G.state==="playing") ? "var(--bad)" : "";
-  $("hudErr").innerHTML = `試錯 <b>${G.errors}</b>/${3 + G.revives}`;
+  $("hudErr").innerHTML = T("hud-mistakes").replace("{n}", "<b>" + G.errors + "</b>").replace("{max}", 3 + G.revives);
   const pv = $("hudPv");
   if(G.previewLeft > 0){
-    pv.innerHTML = `撞數預覽 <b>${G.previewLeft}</b>${G.previewArmed ? " · 下一件" : ""}`;
+    pv.innerHTML = (G.previewArmed ? T("hud-hints-on") : T("hud-hints-ready")).replace("{n}", "<b>" + G.previewLeft + "</b>");
     pv.setAttribute("aria-pressed", G.previewArmed ? "true" : "false");
     pv.classList.remove("pv-buy");
   } else if(G.previewAds < 2){
-    pv.innerHTML = `👁 預覽 +2（廣告 ${G.previewAds}/2）`;
+    pv.innerHTML = T("hud-hints-buy").replace("{k}", G.previewAds);
     pv.setAttribute("aria-pressed", "false");
     pv.classList.add("pv-buy");
   } else {
-    pv.innerHTML = "預覽已用完";
+    pv.innerHTML = T("hud-hints-out");
     pv.setAttribute("aria-pressed", "false");
     pv.classList.remove("pv-buy");
   }
+  pv.title = T("hud-hints-tooltip");
   pv.disabled = G.state !== "playing" || !!G.drag || (G.previewLeft <= 0 && G.previewAds >= 2);
 }
 function renderAll(){ renderBoard(); renderTray(); renderHud(); }
@@ -440,20 +602,20 @@ function registerError(){
   G.errors++;
   renderHud();
   if(G.errors >= 3 + G.revives){
-    if(G.revives < 2) showRevive("試錯用完", `已經試錯 ${G.errors} 次。睇廣告復活可以 +1 命${G.timerOn ? "，兼補 60 秒" : ""}（每局最多復活 2 次，而家用咗 ${G.revives} 次）。`);
-    else showGameOver("試錯用完", `試錯 ${G.errors} 次，復活都用晒（2/2）。呢盤要重開，或者返主頁轉難度。`);
+    if(G.revives < 2) showRevive(T("revive-title-mistakes"), T("revive-text-mistakes").replace("{n}", G.errors).replace("{r}", G.revives).replace("{bonus}", G.timerOn ? T("revive-text-bonus") : ""));
+    else showGameOver(T("revive-title-mistakes"), T("gameover-text-mistakes").replace("{n}", G.errors));
   }
 }
 function onTimeUp(){
-  if(G.revives < 2) showRevive("時間到", `限時用完。睇廣告復活可以 +1 命兼補 60 秒（每局最多復活 2 次，而家用咗 ${G.revives} 次）。`);
-  else showGameOver("時間到", "限時用完，復活都用晒（2/2）。呢盤要重開，或者返主頁轉難度。");
+  if(G.revives < 2) showRevive(T("revive-title-time"), T("revive-text-time").replace("{r}", G.revives));
+  else showGameOver(T("revive-title-time"), T("gameover-text-time"));
 }
 function showRevive(title, text){
   G.state = "revive";
   $("reviveTitle").textContent = title;
   $("reviveText").textContent = text;
   $("reviveBtn").style.display = "";
-  $("reviveBtn").textContent = `📺 睇廣告復活（+1 命${G.timerOn ? " +60 秒" : ""}）`;
+  $("reviveBtn").textContent = G.timerOn ? T("revive-btn-timer") : T("revive-btn");
   showOv("reviveOv");
 }
 function showGameOver(title, text){
@@ -480,12 +642,12 @@ function checkWin(){
   }
   const core = document.createElement("div"); core.className = "core"; bloom.appendChild(core);
   $("doneStats").innerHTML =
-    `難度 <b>${DIFF_LABEL[G.mdiff]}</b><br>種子 <b>${G.board.seed}</b><br>用時 <b>${fmt(G.elapsed)}</b><br>` +
-    `試錯 <b>${G.errors} 次</b><br>復活 <b>${G.revives} 次</b><br>回收 <b>${G.recycles} 次</b><br>買預覽 <b>${G.previewAds} 次</b><br>限時 <b>${G.timerOn ? "有開（限 "+fmt(G.limit)+"）" : "冇開"}</b>`;
+    `${T("done-stat-diff")} <b>${T("diff-"+G.mdiff+"-label")}</b><br>${T("done-stat-seed")} <b>${G.board.seed}</b><br>${T("done-stat-time")} <b>${fmt(G.elapsed)}</b><br>` +
+    `${T("done-stat-mistakes")} <b>${T("done-val-count").replace("{n}", G.errors)}</b><br>${T("done-stat-revives")} <b>${T("done-val-count").replace("{n}", G.revives)}</b><br>${T("done-stat-recycles")} <b>${T("done-val-count").replace("{n}", G.recycles)}</b><br>${T("done-stat-hints-bought")} <b>${T("done-val-count").replace("{n}", G.previewAds)}</b><br>${T("done-stat-timer")} <b>${G.timerOn ? T("done-val-timer-on").replace("{time}", fmt(G.limit)) : T("done-val-timer-off")}</b>`;
   showOv("doneOv");
 }
 function resultText(){
-  return `Lotus Blocks 試手 v0.4.1｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
+  return `Lotus Blocks 試手 v0.4.2｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
 }
 </script>
 
@@ -509,7 +671,7 @@ function goHome(){
 function pauseGame(){
   if(!G || G.state!=="playing") return;
   G.state = "paused";
-  $("pauseTime").textContent = G.timerOn ? "剩 " + fmt(G.limit - G.elapsed) : fmt(G.elapsed);
+  $("pauseTime").textContent = G.timerOn ? T("pause-time-left").replace("{time}", fmt(G.limit - G.elapsed)) : fmt(G.elapsed);
   showOv("pauseOv");
 }
 $("pauseBtn").onclick = pauseGame;
@@ -536,21 +698,21 @@ $("copyBtn").onclick = async ()=>{
     ta.value = txt; document.body.appendChild(ta); ta.select();
     document.execCommand("copy"); ta.remove();
   }
-  $("copyBtn").textContent = "✓ 已複製，去貼低啦";
-  setTimeout(()=>{ $("copyBtn").textContent = "📋 複製本場成績"; }, 2200);
+  $("copyBtn").textContent = T("done-copy-ok");
+  setTimeout(()=>{ $("copyBtn").textContent = T("done-copy"); }, 2200);
 };
 /* ---------- playtest records (localStorage) ---------- */
 const REC_KEY = "lotusblocks.records.v1";
 const PLAY_DEVICE = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ? "手機" : "電腦";
 function loadRecords(){ try{ return JSON.parse(localStorage.getItem(REC_KEY)) || []; }catch(e){ return []; } }
 function saveRecords(rs){ try{ localStorage.setItem(REC_KEY, JSON.stringify(rs.slice(-300))); }catch(e){} }
-function refreshRecCount(){ const el = $("recCount"); if(el) el.textContent = loadRecords().length; }
+function refreshRecCount(){ const el = $("recCountChip"); if(el) el.innerHTML = T("rec-count").replace("{n}", "<b>" + loadRecords().length + "</b>"); }
 function recordGame(result){
   if(!G || G.recorded) return; G.recorded = true;
   const rs = loadRecords();
   const rec = {
     id: Date.now() + "-" + Math.floor(Math.random()*1e6),
-    ver:"v0.4.1", at:new Date().toISOString(),
+    ver:"v0.4.2", at:new Date().toISOString(),
     diff: DIFF_LABEL[G.mdiff], seed: G.board.seed, device: PLAY_DEVICE,
     secs: Math.round(G.elapsed), errors: G.errors, revives: G.revives, recycles: G.recycles || 0,
     pvAds: G.previewAds, timer: !!G.timerOn, result,
@@ -577,7 +739,7 @@ function recordLine(r){
   const when = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
   return `${when}｜${r.diff}｜種子 ${r.seed}｜裝置 ${r.device || "—"}｜用時 ${fmt(r.secs)}｜試錯 ${r.errors}｜復活 ${r.revives}｜回收 ${r.recycles ?? 0}｜買預覽 ${r.pvAds}｜限時 ${r.timer ? "有" : "冇"}｜結果 ${r.result}｜預覽耗盡時剩 ${r.cliff === "未耗盡" ? "未耗盡" : r.cliff + " 件"}`;
 }
-function refreshRecBtn(){ $("recExportBtn").textContent = "📋 匯出全部記錄"; }
+function refreshRecBtn(){ $("recExportBtn").textContent = T("rec-export-btn"); }
 async function copyText(txt){
   try{ await navigator.clipboard.writeText(txt); return true; }
   catch(e){
@@ -589,15 +751,15 @@ async function copyText(txt){
 }
 $("recExportBtn").onclick = async ()=>{
   const rs = loadRecords();
-  if(!rs.length){ $("recExportBtn").textContent = "（未有記錄）"; setTimeout(refreshRecBtn, 1800); return; }
-  const txt = `Lotus Blocks 試玩記錄（v0.4.1，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
+  if(!rs.length){ $("recExportBtn").textContent = T("rec-export-empty"); setTimeout(refreshRecBtn, 1800); return; }
+  const txt = `Lotus Blocks 試玩記錄（v0.4.2，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
   const ok = await copyText(txt);
-  $("recExportBtn").textContent = ok ? "✓ 已複製，貼返俾開發者啦" : "複製失敗，請再試";
+  $("recExportBtn").textContent = ok ? T("rec-export-ok") : T("rec-export-fail");
   setTimeout(refreshRecBtn, 2200);
 };
 $("recClearBtn").onclick = ()=>{
   if(!loadRecords().length) return;
-  if(confirm("清除全部試玩記錄？清咗就匯出唔返。")){ saveRecords([]); refreshRecCount(); }
+  if(confirm(T("rec-clear-confirm"))){ saveRecords([]); refreshRecCount(); }
 };
 
 let toastTimer = null;
@@ -827,9 +989,49 @@ function fitCell(){
 }
 window.addEventListener("resize", fitCell);
 fitCell();
-buildMenu();
-buildSeedRow();
-refreshRecCount();
+
+/* ---------- v0.4.2 語言切換：掣喺主頁選單頂；選擇存 localStorage，入頁保留 ---------- */
+function applyLang(){
+  document.documentElement.lang = lang === "en" ? "en" : "zh-Hant";
+  document.title = T("page-title");
+  $("headerSub").textContent = T("header-sub");
+  $("menuIntro").innerHTML = T("menu-intro");
+  document.querySelectorAll(".seed-chip").forEach(ch=>{ ch.textContent = T("seed-chip-"+ch.dataset.mode); });
+  $("seedInput").placeholder = T("seed-input-placeholder");
+  $("timerLabel").textContent = T("timer-label");
+  $("timerDesc").textContent = T("timer-desc");
+  $("startBtn").textContent = T("start-btn");
+  $("howtoNote").textContent = T("howto-note");
+  $("recExportBtn").textContent = T("rec-export-btn");
+  $("recClearBtn").textContent = T("rec-clear-btn");
+  $("recNote").textContent = T("rec-note");
+  $("pauseBtn").textContent = T("hud-pause");
+  $("restartBtn").textContent = T("hud-restart");
+  $("homeBtn").textContent = T("hud-home");
+  $("trayTitle").textContent = T("tray-title");
+  $("pageFooter").innerHTML = T("footer").replace("\n", "<br>");
+  $("pauseTitle").textContent = T("pause-title");
+  $("pauseText").textContent = T("pause-text");
+  $("resumeBtn").textContent = T("pause-resume");
+  $("pauseHomeBtn").textContent = T("pause-home");
+  $("reviveRestartBtn").textContent = T("revive-restart");
+  $("reviveHomeBtn").textContent = T("revive-home");
+  $("doneTitle").textContent = T("done-title");
+  $("copyBtn").textContent = T("done-copy");
+  $("againBtn").textContent = T("done-again");
+  $("doneHomeBtn").textContent = T("done-home");
+  $("adTitle").textContent = T("ad-title");
+  $("adText").textContent = T("ad-text");
+  $("langBtn").textContent = T("lang-toggle");
+  buildMenu(); buildSeedRow(); refreshRecCount();
+  if(G) renderAll();
+}
+$("langBtn").onclick = ()=>{
+  lang = lang === "zh" ? "en" : "zh";
+  try{ localStorage.setItem("lotusblocks.lang", lang); }catch(e){}
+  applyLang();
+};
+applyLang();
 </script>
 </body>
 </html>
