@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lotus Blocks — 試手 v0.3</title>
+<title>Lotus Blocks — 試手 v0.3.1</title>
 <style>
   :root{
     --ink:#2e3a34; --sage:#476b5d; --sage-d:#38564b; --petal:#d96c8a; --petal-soft:#f7e0e8;
@@ -103,7 +103,7 @@
 <div class="wrap">
   <header class="top">
     <h1>Lotus Blocks</h1>
-    <div class="sub">試 手 v0.3 · PLAYTEST</div>
+    <div class="sub">試 手 v0.3.1 · PLAYTEST</div>
   </header>
 
   <!-- ======== MENU ======== -->
@@ -132,7 +132,7 @@
       <button class="hbtn" id="recExportBtn">📋 匯出全部記錄</button>
       <button class="hbtn" id="recClearBtn">🗑 清除記錄</button>
     </div>
-    <p class="note">每盤完成或結束會自動記錄喺呢部機（唔會上傳），試玩完撳「匯出全部記錄」一次過複製貼返俾開發者。記錄只存喺呢個瀏覽器，清瀏覽器資料或者用私密模式會冇咗。</p>
+    <p class="note">每盤完成、結束或者中途放棄都會自動記錄喺呢部機（唔會上傳），試玩完撳「匯出全部記錄」一次過複製貼返俾開發者。記錄只存喺呢個瀏覽器，清瀏覽器資料或者用私密模式會冇咗。</p>
   </section>
 
   <!-- ======== GAME ======== -->
@@ -158,7 +158,7 @@
     <div id="tray"></div>
   </section>
 
-  <footer>Lotus Blocks 試手 v0.3 — 驗證手感用，唔係完成品。<br>每盤成績會自動記錄，喺主頁撳「匯出全部記錄」一次過貼返俾開發者。</footer>
+  <footer>Lotus Blocks 試手 v0.3.1 — 驗證手感用，唔係完成品。<br>每盤成績會自動記錄，喺主頁撳「匯出全部記錄」一次過貼返俾開發者。</footer>
 </div>
 
 <!-- ======== PAUSE ======== -->
@@ -385,6 +385,7 @@ function renderAll(){ renderBoard(); renderTray(); renderHud(); }
 
 /* ---------- game flow ---------- */
 function newGame(board, timerOn, mdiff){
+  if(typeof recordAbandon === "function") recordAbandon();
   const pieces = makePieces(board);
   const trayCount = pieces.filter(p=>!p.given).length;
   G = { board, pieces, diff: board.difficulty, mdiff, timerOn, limit: trayCount*30,
@@ -452,7 +453,7 @@ function checkWin(){
   showOv("doneOv");
 }
 function resultText(){
-  return `Lotus Blocks 試手 v0.3｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
+  return `Lotus Blocks 試手 v0.3.1｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
 }
 </script>
 
@@ -465,6 +466,7 @@ function fakeAd(cb){
   setTimeout(()=>{ hideOv("adOv"); cb(); }, 1100);
 }
 function goHome(){
+  recordAbandon();
   G = null;
   ["pauseOv","reviveOv","doneOv","adOv"].forEach(hideOv);
   $("game").classList.add("hidden");
@@ -506,25 +508,41 @@ $("copyBtn").onclick = async ()=>{
 };
 /* ---------- playtest records (localStorage) ---------- */
 const REC_KEY = "lotusblocks.records.v1";
+const PLAY_DEVICE = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ? "手機" : "電腦";
 function loadRecords(){ try{ return JSON.parse(localStorage.getItem(REC_KEY)) || []; }catch(e){ return []; } }
 function saveRecords(rs){ try{ localStorage.setItem(REC_KEY, JSON.stringify(rs.slice(-300))); }catch(e){} }
 function refreshRecCount(){ const el = $("recCount"); if(el) el.textContent = loadRecords().length; }
 function recordGame(result){
   if(!G || G.recorded) return; G.recorded = true;
   const rs = loadRecords();
-  rs.push({
-    ver:"v0.3", at:new Date().toISOString(),
-    diff: DIFF_LABEL[G.mdiff], seed: G.board.seed,
+  const rec = {
+    id: Date.now() + "-" + Math.floor(Math.random()*1e6),
+    ver:"v0.3.1", at:new Date().toISOString(),
+    diff: DIFF_LABEL[G.mdiff], seed: G.board.seed, device: PLAY_DEVICE,
     secs: Math.round(G.elapsed), errors: G.errors, revives: G.revives,
     pvAds: G.previewAds, timer: !!G.timerOn, result,
     cliff: G.pvCliff === null ? "未耗盡" : G.pvCliff
-  });
+  };
+  G.recordId = rec.id;
+  rs.push(rec);
   saveRecords(rs); refreshRecCount();
 }
+function recordAbandon(){
+  if(G && !G.recorded && (G.state === "playing" || G.state === "paused")) recordGame("放棄");
+}
+window.addEventListener("pagehide", ()=>{
+  if(G && !G.recorded && (G.state === "playing" || G.state === "paused")) recordGame("未完成");
+});
+window.addEventListener("pageshow", e=>{
+  if(!e.persisted || !G || !G.recorded || !G.recordId) return;
+  const rs = loadRecords();
+  const kept = rs.filter(r=>!(r.id === G.recordId && r.result === "未完成"));
+  if(kept.length !== rs.length){ saveRecords(kept); G.recorded = false; G.recordId = null; refreshRecCount(); }
+});
 function recordLine(r){
   const d = new Date(r.at), p = n=>String(n).padStart(2,"0");
   const when = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
-  return `${when}｜${r.diff}｜種子 ${r.seed}｜用時 ${fmt(r.secs)}｜試錯 ${r.errors}｜復活 ${r.revives}｜買預覽 ${r.pvAds}｜限時 ${r.timer ? "有" : "冇"}｜結果 ${r.result}｜預覽耗盡時剩 ${r.cliff === "未耗盡" ? "未耗盡" : r.cliff + " 件"}`;
+  return `${when}｜${r.diff}｜種子 ${r.seed}｜裝置 ${r.device || "—"}｜用時 ${fmt(r.secs)}｜試錯 ${r.errors}｜復活 ${r.revives}｜買預覽 ${r.pvAds}｜限時 ${r.timer ? "有" : "冇"}｜結果 ${r.result}｜預覽耗盡時剩 ${r.cliff === "未耗盡" ? "未耗盡" : r.cliff + " 件"}`;
 }
 function refreshRecBtn(){ $("recExportBtn").textContent = "📋 匯出全部記錄"; }
 async function copyText(txt){
@@ -539,7 +557,7 @@ async function copyText(txt){
 $("recExportBtn").onclick = async ()=>{
   const rs = loadRecords();
   if(!rs.length){ $("recExportBtn").textContent = "（未有記錄）"; setTimeout(refreshRecBtn, 1800); return; }
-  const txt = `Lotus Blocks 試玩記錄（v0.3，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
+  const txt = `Lotus Blocks 試玩記錄（v0.3.1，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
   const ok = await copyText(txt);
   $("recExportBtn").textContent = ok ? "✓ 已複製，貼返俾開發者啦" : "複製失敗，請再試";
   setTimeout(refreshRecBtn, 2200);
