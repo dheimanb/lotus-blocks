@@ -3,128 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lotus Blocks — 試玩版 v0.4.2</title>
+<title>Lotus Blocks — 試玩版 v0.4.3</title>
 <style>
   :root{
-    --ink:#2e3a34; --sage:#476b5d; --sage-d:#38564b; --petal:#d96c8a; --petal-soft:#f7e0e8;
-    --water:#eef4f1; --paper:#fffdf8; --bad:#e5484d; --bad-soft:#fbe3e4; --line:#b9c8c0;
+    --bg:#eef4f1; --surface:#fffdf8; --surface-raised:#ffffff; --surface-tint:#f3f8f5;
+    --ink:#2e3a34; --ink-2:#4f6158; --line:#b9c8c0;
+    --action:#476b5d; --action-hover:#38564b;
+    --accent:#d96c8a; --accent-strong:#a94a67; --accent-soft:#f7e0e8; --accent-line:#e3b7c4;
+    --given:#BA7880; --given-ink:#ffffff; --error:#e5484d; --error-text:#b3261e; --error-soft:#fbe3e4;
+    --preview-ok:#1f7a8d; --gold:#ffd166; --focus:#a94a67;
+    --toast-bg:#fdf3e3; --toast-line:#e5c07b; --toast-ink:#6b5518;
+    --sp-xs:4px; --sp-sm:8px; --sp-md:12px; --sp-lg:16px; --sp-xl:20px; --sp-2xl:24px; --sp-3xl:32px; --sp-4xl:48px;
+    --r-sm:4px; --r-md:10px; --r-lg:12px; --r-xl:14px; --r-2xl:16px; --r-full:999px;
     --cell:44px;
     --tray-cell:21px;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{font-family:"PingFang HK","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--water);color:var(--ink);min-height:100vh}
-  .wrap{max-width:560px;margin:0 auto;padding:14px 12px 40px}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  ::selection{background:var(--accent-soft)}
+  .card p,.note,.panel p{text-wrap:pretty}
+  .rule-group{margin-top:var(--sp-2xl)}
+  .rule-group h3{font-size:14px;font-weight:600;letter-spacing:.06em;margin:0 0 var(--sp-xs)}
+  .rule-group .note{margin-top:0}
+  body{font-family:"PingFang HK","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  .wrap{max-width:560px;margin:0 auto;padding:var(--sp-md) var(--sp-md) var(--sp-4xl)}
   header.top{text-align:center;padding:8px 0 4px}
-  header.top h1{font-family:Georgia,serif;font-weight:normal;font-size:1.7rem;letter-spacing:.05em}
-  header.top .sub{color:#7d9186;font-size:.82rem;letter-spacing:.22em;margin-top:2px}
-  .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:12px;box-shadow:0 2px 10px rgba(46,58,52,.05)}
+  header.top h1{font-family:Georgia,serif;font-weight:normal;font-size:1.7rem;letter-spacing:.05em;text-wrap:balance}
+  header.top .sub{color:var(--ink-2);font-size:13px;letter-spacing:.22em;margin-top:2px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:var(--sp-lg);margin-top:var(--sp-md);box-shadow:0 2px 10px rgba(46,58,52,.05)}
   /* ---------- menu ---------- */
-  .diff-btn{display:block;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;margin-top:10px;cursor:pointer;font-size:1rem;color:var(--ink)}
-  .diff-btn.sel{border-color:var(--petal);background:var(--petal-soft)}
-  .diff-btn b{font-size:1.08rem}
-  .diff-btn span{display:block;color:#6d8177;font-size:.85rem;margin-top:3px;line-height:1.5}
-  .timer-row{display:flex;gap:10px;align-items:flex-start;margin-top:14px;background:#f3f8f5;border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer}
-  .timer-row input{margin-top:3px;width:18px;height:18px;accent-color:var(--petal)}
-  .timer-row .t1{font-weight:600}
-  .timer-row .t2{color:#6d8177;font-size:.84rem;line-height:1.5;margin-top:2px}
-  .start-btn{display:block;width:100%;margin-top:14px;background:var(--sage);color:#fff;border:none;border-radius:12px;padding:14px;font-size:1.1rem;cursor:pointer;letter-spacing:.1em}
-  .start-btn:hover{background:var(--sage-d)}
-  .note{color:#8aa396;font-size:.8rem;line-height:1.6;margin-top:12px}
+  .diff-btn{display:block;width:100%;text-align:left;border:2px solid var(--line);background:var(--surface-raised);border-radius:var(--r-lg);padding:var(--sp-md);margin-top:var(--sp-md);cursor:pointer;font-size:1rem;color:var(--ink)}
+  .diff-btn.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .diff-btn b{font-size:17px}
+  .diff-btn span{display:block;color:var(--ink-2);font-size:14px;margin-top:3px;line-height:1.5}
+  .timer-row{display:flex;gap:10px;align-items:flex-start;margin-top:var(--sp-md);background:var(--surface-tint);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-md);cursor:pointer}
+  .timer-row input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent)}
+  .timer-row .t1{font-weight:600;font-size:14px}
+  .timer-row .t2{color:var(--ink-2);font-size:14px;line-height:1.5;margin-top:2px}
+  .start-btn{display:block;width:100%;margin-top:var(--sp-md);background:var(--action);color:#fff;border:none;border-radius:var(--r-lg);padding:14px;font-size:1.1rem;cursor:pointer;letter-spacing:.1em}
+  .start-btn:hover{background:var(--action-hover)}
+  .note{color:var(--ink-2);font-size:14px;line-height:1.6;margin-top:var(--sp-md)}
   /* ---------- game hud ---------- */
-  .hud{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
-  .hud .grp{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.86rem}
+  .hud{display:flex;flex-wrap:wrap;gap:var(--sp-sm);align-items:center;justify-content:space-between;margin-top:var(--sp-md)}
+  .hud .grp{display:flex;gap:var(--sp-sm);align-items:center;flex-wrap:wrap}
+  .chip{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--r-full);padding:var(--sp-xs) var(--sp-md);font-size:14px}
   .chip b{font-variant-numeric:tabular-nums}
-  .chip.err{border-color:var(--bad);color:var(--bad)}
-  .hbtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:.86rem;cursor:pointer;color:var(--ink)}
-  .hbtn:hover{border-color:var(--sage)}
+  .chip.err{border-color:var(--error);color:var(--error-text)}
+  .hbtn{border:1px solid var(--line);background:var(--surface-raised);border-radius:var(--r-full);padding:var(--sp-xs) var(--sp-md);font-size:14px;cursor:pointer;color:var(--ink)}
+  .hbtn:hover{border-color:var(--action)}
   .hbtn:disabled{opacity:.45;cursor:default}
   .chip-btn{font:inherit;color:inherit;text-align:left}
-  .chip-btn[aria-pressed="true"]{background:var(--petal);border-color:var(--petal);color:#fff;box-shadow:0 0 0 2px var(--petal-soft)}
+  .chip-btn[aria-pressed="true"]{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff;box-shadow:0 0 0 2px var(--accent-soft)}
   /* v0.4 一屏佈局：入局後壓縮頁首／HUD，盤同件盤按可用高度一齊縮放 */
-  body.in-game .wrap{height:100vh;height:100dvh;padding:8px 10px 10px;display:flex;flex-direction:column}
+  body.in-game .wrap{height:100vh;height:100dvh;padding:var(--sp-sm) var(--sp-md) var(--sp-md);display:flex;flex-direction:column}
   body.in-game header.top{display:flex;align-items:baseline;justify-content:center;gap:10px;padding:2px 0 0}
   body.in-game header.top h1{font-size:1.28rem}
   body.in-game header.top .sub{font-size:.68rem;margin-top:0;letter-spacing:.18em}
   body.in-game footer{display:none}
   body.in-game #game{display:flex;flex-direction:column;min-height:0;flex:1}
-  body.in-game .hud{gap:5px;margin-top:6px}
-  body.in-game .hud .grp{gap:5px}
-  body.in-game .chip{padding:3px 8px;font-size:.78rem}
-  body.in-game .hbtn{padding:4px 9px;font-size:.78rem}
-  body.in-game .board-wrap{margin-top:8px}
-  body.in-game .tray-title{margin-top:10px;font-size:.8rem}
-  body.in-game #tray{gap:8px;margin-top:6px;padding:10px;min-height:0}
+  body.in-game .hud{gap:var(--sp-xs);margin-top:var(--sp-sm)}
+  body.in-game .hud .grp{gap:var(--sp-xs)}
+  body.in-game .chip{padding:var(--sp-xs) var(--sp-sm);font-size:.78rem}
+  body.in-game .hbtn{padding:var(--sp-xs) var(--sp-sm);font-size:.78rem}
+  body.in-game .board-wrap{margin-top:var(--sp-sm)}
+  body.in-game .tray-title{margin-top:var(--sp-md);font-size:13px}
+  body.in-game #tray{gap:var(--sp-sm);margin-top:var(--sp-sm);padding:var(--sp-md);min-height:0}
   /* v0.4.1 入局鎖滑動：求解器話入到先鎖，極矮屏就唔鎖（寧願滑好過睇唔到件盤） */
   body.in-game.scroll-locked{position:fixed;width:100%;overflow:hidden;overscroll-behavior:none}
   body.in-game.scroll-locked #game{touch-action:none}
-  .chip-btn.pv-buy{border-color:var(--petal);color:var(--petal);font-weight:700}
+  .chip-btn.pv-buy{border-color:var(--accent-strong);color:var(--accent-strong);font-weight:700}
   /* ---------- board ---------- */
-  .board-wrap{display:flex;justify-content:center;margin-top:12px}
-  #board{display:grid;grid-template-columns:repeat(9,var(--cell));grid-template-rows:repeat(9,var(--cell));background:var(--sage-d);gap:1px;padding:3px;border-radius:8px;touch-action:none}
-  .cell{background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*.52);position:relative;user-select:none}
+  .board-wrap{display:flex;justify-content:center;margin-top:var(--sp-md)}
+  #board{display:grid;grid-template-columns:repeat(9,var(--cell));grid-template-rows:repeat(9,var(--cell));background:var(--action-hover);gap:1px;padding:3px;border-radius:8px;touch-action:none}
+  .cell{background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*.52);position:relative;user-select:none}
   .cell.br{margin-right:2px}.cell.bb{margin-bottom:2px}
   /* v0.1.3 起：定版唔用綠——用參考色階做錨，綠色退返去版面外（盤框／頁面）。
      v0.2：按 heiman 拍板改用鄰近嘅暗紅色 #BA7880，減低同方塊嘅色差衝突。 */
-  .cell.given{background:#BA7880;color:#fff;font-weight:700}
-  .cell.placed{background:var(--petal-soft);color:var(--ink);font-weight:600;cursor:grab}
-  .cell.conflict{background:var(--bad)!important;color:#fff!important}
+  .cell.given{background:var(--given);color:var(--given-ink);font-weight:700}
+  .cell.placed{background:var(--accent-soft);color:var(--ink);font-weight:600;cursor:grab}
+  .cell.conflict{background:var(--error)!important;color:#fff!important}
   /* v0.1.2 配色層：預覽改行 overlay，唔再換底色——格本身嘅身份（定版綠／已放粉紅）全程保留，
      預覽只係上面加一層：可放＝藍綠色環＋薄染；有問題＝紅斜紋＋紅環。 */
   .cell.pv-ok{background-image:linear-gradient(rgba(31,122,141,.20),rgba(31,122,141,.20));box-shadow:inset 0 0 0 3px rgba(31,122,141,.9)}
-  .cell.pv-bad{background-image:repeating-linear-gradient(45deg,rgba(229,72,77,.5) 0 4px,rgba(229,72,77,0) 4px 9px);box-shadow:inset 0 0 0 2px var(--bad)}
+  .cell.pv-bad{background-image:repeating-linear-gradient(45deg,rgba(229,72,77,.5) 0 4px,rgba(229,72,77,0) 4px 9px);box-shadow:inset 0 0 0 2px var(--error)}
   /* 深紅定版格上面紅斜紋會沉，改用白紋白環先睇得清 */
   .cell.given.pv-bad{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 4px,rgba(255,255,255,0) 4px 9px);box-shadow:inset 0 0 0 2px #fff}
   .cell.hint-flash{animation:hintflash .5s ease-in-out 6 alternate}
-  @keyframes hintflash{from{box-shadow:inset 0 0 0 3px var(--petal)}to{box-shadow:inset 0 0 0 3px #ffd166}}
+  @keyframes hintflash{from{box-shadow:inset 0 0 0 3px var(--accent)}to{box-shadow:inset 0 0 0 3px var(--gold)}}
   /* ---------- tray ---------- */
-  .tray-title{margin-top:16px;color:#6d8177;font-size:.86rem;letter-spacing:.14em}
-  #tray{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;background:#fff;border:1px dashed var(--line);border-radius:12px;padding:12px;min-height:74px;touch-action:none;transition:background .15s,border-color .15s}
-  #tray.drop-ok{border-color:var(--petal);background:#fdf3f6}
-  #tray.drop-hot{border-style:solid;background:var(--petal-soft);box-shadow:inset 0 0 0 2px var(--petal)}
+  .tray-title{margin-top:var(--sp-lg);color:var(--ink-2);font-size:14px;letter-spacing:.14em}
+  #tray{display:flex;flex-wrap:wrap;gap:var(--sp-md);margin-top:var(--sp-sm);background:var(--surface-raised);border:1px dashed var(--line);border-radius:var(--r-lg);padding:var(--sp-md);min-height:74px;touch-action:none;transition:background .15s,border-color .15s}
+  #tray.drop-ok{border-color:var(--accent);background:var(--accent-soft)}
+  #tray.drop-hot{border-style:solid;background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
   #board, #tray, .hud, .card, .tray-piece{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .tray-piece{display:grid;gap:2px;cursor:grab;touch-action:none;padding:3px;border-radius:6px}
-  .tray-piece:hover{background:#f3f8f5}
-  .tray-piece .tc{width:var(--tray-cell);height:var(--tray-cell);background:var(--petal-soft);border:1px solid #e3b7c4;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:calc(var(--tray-cell)*.6);font-weight:600}
+  .tray-piece:hover{background:var(--surface-tint)}
+  .tray-piece .tc{width:var(--tray-cell);height:var(--tray-cell);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:calc(var(--tray-cell)*.6);font-weight:600}
   .tray-piece .tc.empty{background:transparent;border:none}
-  .tray-empty{color:#8aa396;font-size:.9rem;padding:8px}
+  .tray-empty{color:var(--ink-2);font-size:14px;padding:var(--sp-sm)}
   /* ---------- drag ghost ---------- */
   #ghost{position:fixed;z-index:60;display:none;pointer-events:none;opacity:.92;filter:drop-shadow(0 8px 14px rgba(46,58,52,.35))}
-  #ghost .gc{background:var(--petal-soft);border:1.5px solid var(--petal);display:flex;align-items:center;justify-content:center;font-weight:700}
+  #ghost .gc{background:var(--accent-soft);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700}
   #ghost .gc.empty{background:transparent;border:none}
   /* ---------- overlays ---------- */
-  .overlay{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(238,244,241,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:18px}
+  .overlay{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(238,244,241,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:var(--sp-lg)}
   .overlay.show{display:flex}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 22px;max-width:420px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(46,58,52,.18)}
-  .panel h2{font-family:Georgia,serif;font-weight:normal;font-size:1.45rem;margin-bottom:8px}
-  .panel p{color:#54655c;line-height:1.65;font-size:.95rem}
-  .panel .big-time{font-size:2rem;font-variant-numeric:tabular-nums;margin:10px 0}
-  .pbtn{display:block;width:100%;margin-top:10px;border-radius:11px;padding:12px;font-size:1rem;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink)}
-  .pbtn.primary{background:var(--sage);border-color:var(--sage);color:#fff}
-  .pbtn.primary:hover{background:var(--sage-d)}
-  .stats{text-align:left;margin:14px auto 4px;max-width:280px;line-height:1.9;font-size:.95rem}
+  .panel{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--r-2xl);padding:var(--sp-2xl);max-width:420px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(46,58,52,.18)}
+  .panel h2{font-family:Georgia,serif;font-weight:normal;font-size:23px;margin-bottom:var(--sp-sm);text-wrap:balance}
+  .panel p{color:var(--ink-2);line-height:1.65;font-size:15px}
+  .panel .big-time{font-size:2rem;font-variant-numeric:tabular-nums;margin:var(--sp-md) 0}
+  .pbtn{display:block;width:100%;margin-top:var(--sp-md);border-radius:var(--r-lg);padding:var(--sp-md);font-size:1rem;cursor:pointer;border:1px solid var(--line);background:var(--surface-raised);color:var(--ink)}
+  .pbtn.primary{background:var(--action);border-color:var(--action);color:#fff}
+  .pbtn.primary:hover{background:var(--action-hover)}
+  .stats{text-align:left;margin:var(--sp-md) auto var(--sp-xs);max-width:280px;line-height:1.9;font-size:15px}
   .stats b{float:right;font-variant-numeric:tabular-nums}
   /* lotus bloom */
-  .bloom{position:relative;width:110px;height:110px;margin:2px auto 8px}
-  .bloom .pt{position:absolute;left:50%;top:50%;width:30px;height:52px;margin:-52px 0 0 -15px;background:linear-gradient(180deg,#f3c6d3,var(--petal));border-radius:50% 50% 50% 50%/62% 62% 38% 38%;transform-origin:50% 100%;opacity:0;animation:bloomin .8s ease forwards}
-  .bloom .core{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-9px 0 0 -11px;background:#ffd166;border-radius:50%;opacity:0;animation:bloomin .6s .55s ease forwards}
+  .bloom{position:relative;width:110px;height:110px;margin:var(--sp-xs) auto var(--sp-sm)}
+  .bloom .pt{position:absolute;left:50%;top:50%;width:30px;height:52px;margin:-52px 0 0 -15px;background:linear-gradient(180deg,#f3c6d3,var(--accent));border-radius:50% 50% 50% 50%/62% 62% 38% 38%;transform-origin:50% 100%;opacity:0;animation:bloomin .8s ease forwards}
+  .bloom .core{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-9px 0 0 -11px;background:var(--gold);border-radius:50%;opacity:0;animation:bloomin .6s .55s ease forwards}
   @keyframes bloomin{from{opacity:0;transform:rotate(var(--rot)) scale(.25)}to{opacity:1;transform:rotate(var(--rot)) scale(1)}}
   .hidden{display:none!important}
-  .seed-modes{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .seed-chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:.92rem;cursor:pointer;color:var(--ink)}
-  .seed-chip.sel{border-color:var(--petal);background:var(--petal-soft)}
-  .seed-input{width:100%;margin-top:10px;border:2px solid var(--line);border-radius:10px;padding:10px 12px;font-size:1rem;background:#fff;color:var(--ink)}
-  #toast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:90;width:max-content;max-width:min(92vw,520px);text-align:center;background:#fdf3e3;border:1px solid #e5c07b;color:#6b5518;border-radius:999px;padding:10px 18px;font-size:.9rem;line-height:1.55;box-shadow:0 8px 24px rgba(46,58,52,.25);pointer-events:none}
+  .seed-modes{display:flex;flex-wrap:wrap;gap:var(--sp-sm);margin-top:var(--sp-md)}
+  .seed-chip{border:2px solid var(--line);background:var(--surface-raised);border-radius:var(--r-full);padding:var(--sp-sm) var(--sp-md);font-size:15px;cursor:pointer;color:var(--ink)}
+  .seed-chip.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .seed-input{width:100%;margin-top:var(--sp-md);border:2px solid var(--line);border-radius:var(--r-md);padding:var(--sp-sm) var(--sp-md);font-size:1rem;background:var(--surface-raised);color:var(--ink);caret-color:var(--accent)}
+  #toast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:90;width:max-content;max-width:min(92vw,520px);text-align:center;background:var(--toast-bg);border:1px solid var(--toast-line);color:var(--toast-ink);border-radius:var(--r-full);padding:var(--sp-sm) var(--sp-lg);font-size:14px;line-height:1.55;box-shadow:0 8px 24px rgba(46,58,52,.25);pointer-events:none}
   #toast.show{display:block}
-  .rec-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}
-  footer{margin-top:16px;text-align:center;color:#8aa396;font-size:.78rem;line-height:1.7}
+  .rec-row{display:flex;gap:var(--sp-sm);align-items:center;flex-wrap:wrap;margin-top:var(--sp-2xl)}
+  footer{margin-top:var(--sp-lg);text-align:center;color:var(--ink-2);font-size:13px;line-height:1.6;text-wrap:balance}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <h1>Lotus Blocks</h1>
-    <div class="sub" id="headerSub">試玩版 v0.4.2 · PLAYTEST</div>
+    <div class="sub" id="headerSub">試玩版 v0.4.3 · PLAYTEST</div>
   </header>
 
   <!-- ======== MENU ======== -->
@@ -147,7 +160,18 @@
       </div>
     </label>
     <button class="start-btn" id="startBtn">開始</button>
-    <p class="note" id="howtoNote">試玩版：廣告係假嘅，只會扮播 1 秒。「Hints」掣喺遊戲上方。拖方塊之前撳一下，拖下一件時就會見到邊格撞數，放低先扣 1 次（簡單 8 次，普通／困難 5 次）。再撳一下就會取消。冇撳就只會提示有冇疊住其他格。用晒之後，同一粒掣會變成「Hints +2」：睇段廣告就加 2 次，每局最多買 2 次，買完自動幫下一件開定。未用晒唔可以買。放錯唔會即刻輸：撞數嘅格會變紅，鬆手時有撞數就計 1 次試錯，最多 3 次。試錯用完（或者時間到）可以睇廣告復活，即係多 1 次試錯機會，有開限時再加 60 秒。每局最多 2 次，同買 Hints 分開計。已放嘅方塊拖出盤面，喺邊度鬆手都可以收返；用咗嘅 Hints 唔退，已計嘅試錯唔取消。</p>
+    <div class="rule-group">
+      <h3 id="howtoHintsTitle">Hints 點用</h3>
+      <p class="note" id="howtoHints">「Hints」掣喺遊戲上方。拖方塊之前撳一下，拖下一件時就會見到邊格撞數，放低先扣 1 次（簡單 8 次，普通／困難 5 次）。再撳一下就會取消。冇撳就只會提示有冇疊住其他格。用晒之後，同一粒掣會變成「Hints +2」：睇段廣告就加 2 次，每局最多買 2 次，買完自動幫下一件開定。未用晒唔可以買。</p>
+    </div>
+    <div class="rule-group">
+      <h3 id="howtoReviveTitle">試錯與復活</h3>
+      <p class="note" id="howtoRevive">放錯唔會即刻輸：撞數嘅格會變紅，鬆手時有撞數就計 1 次試錯，最多 3 次。試錯用完（或者時間到）可以睇廣告復活，即係多 1 次試錯機會，有開限時再加 60 秒。每局最多 2 次，同買 Hints 分開計。</p>
+    </div>
+    <div class="rule-group">
+      <h3 id="howtoRecycleTitle">收回與記錄</h3>
+      <p class="note" id="howtoRecycle">已放嘅方塊拖出盤面，喺邊度鬆手都可以收返；用咗嘅 Hints 唔退，已計嘅試錯唔取消。試玩版：廣告係假嘅，只會扮播 1 秒。</p>
+    </div>
     <div class="rec-row">
       <span class="chip" id="recCountChip">📒 試玩記錄 <b>0</b> 盤</span>
       <button class="hbtn" id="recExportBtn">📋 匯出全部記錄</button>
@@ -178,7 +202,7 @@
     <div id="tray"></div>
   </section>
 
-  <footer id="pageFooter">Lotus Blocks 試玩版 v0.4.2：用嚟試手感，未係完成品。<br>每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。</footer>
+  <footer id="pageFooter">Lotus Blocks 試玩版 v0.4.3：用嚟試手感，未係完成品。<br>每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。</footer>
 </div>
 
 <!-- ======== PAUSE ======== -->
@@ -207,7 +231,7 @@
 <div class="overlay" id="doneOv">
   <div class="panel">
     <div class="bloom" id="bloom"></div>
-    <h2 id="doneTitle">完成！朵蓮花開咗</h2>
+    <h2 id="doneTitle">完成！</h2>
     <div class="stats" id="doneStats"></div>
     <button class="pbtn primary" id="copyBtn">📋 複製本場成績</button>
     <button class="pbtn" id="againBtn">再玩同一盤</button>
@@ -237,8 +261,8 @@ const PREVIEW_FREE = {easy:8, normal:5, hard:5};
    記錄格式（recordLine／export header／resultText 欄位名）不動，只升版號。 */
 const STR = {
  "zh": {
-  "page-title": "Lotus Blocks — 試玩版 v0.4.2",
-  "header-sub": "試玩版 v0.4.2 · PLAYTEST",
+  "page-title": "Lotus Blocks — 試玩版 v0.4.3",
+  "header-sub": "試玩版 v0.4.3 · PLAYTEST",
   "menu-intro": "一盤完整數獨答案切成好多件方塊。將方塊全部拖返入 9×9 格，令每行、每列、每個 3×3 宮都係 1–9 唔重複，就完成。深紅色係<b>定版件</b>：開局已經放好、鎖死，唔使理。粉紅色方塊喺下面件盤，拖上去放。上面「<b>Hints</b>」掣會話你知下一件放落邊度會撞數。每盤由種子（即係盤號）生成，同一個種子永遠同一盤。",
   "diff-easy-label": "簡單",
   "diff-normal-label": "普通",
@@ -256,7 +280,12 @@ const STR = {
   "timer-label": "開限時（倒數）",
   "timer-desc": "時限 ＝ 要放嘅方塊數目 × 30 秒。預設：簡單、普通唔開，困難開；任何難度都可以自己揀開定唔開。",
   "start-btn": "開始",
-  "howto-note": "試玩版：廣告係假嘅，只會扮播 1 秒。「Hints」掣喺遊戲上方。拖方塊之前撳一下，拖下一件時就會見到邊格撞數，放低先扣 1 次（簡單 8 次，普通／困難 5 次）。再撳一下就會取消。冇撳就只會提示有冇疊住其他格。用晒之後，同一粒掣會變成「Hints +2」：睇段廣告就加 2 次，每局最多買 2 次，買完自動幫下一件開定。未用晒唔可以買。放錯唔會即刻輸：撞數嘅格會變紅，鬆手時有撞數就計 1 次試錯，最多 3 次。試錯用完（或者時間到）可以睇廣告復活，即係多 1 次試錯機會，有開限時再加 60 秒。每局最多 2 次，同買 Hints 分開計。已放嘅方塊拖出盤面，喺邊度鬆手都可以收返；用咗嘅 Hints 唔退，已計嘅試錯唔取消。",
+    "howto-hints-title": "Hints 點用",
+  "howto-hints": "「Hints」掣喺遊戲上方。拖方塊之前撳一下，拖下一件時就會見到邊格撞數，放低先扣 1 次（簡單 8 次，普通／困難 5 次）。再撳一下就會取消。冇撳就只會提示有冇疊住其他格。用晒之後，同一粒掣會變成「Hints +2」：睇段廣告就加 2 次，每局最多買 2 次，買完自動幫下一件開定。未用晒唔可以買。",
+  "howto-revive-title": "試錯與復活",
+  "howto-revive": "放錯唔會即刻輸：撞數嘅格會變紅，鬆手時有撞數就計 1 次試錯，最多 3 次。試錯用完（或者時間到）可以睇廣告復活，即係多 1 次試錯機會，有開限時再加 60 秒。每局最多 2 次，同買 Hints 分開計。",
+  "howto-recycle-title": "收回與記錄",
+  "howto-recycle": "已放嘅方塊拖出盤面，喺邊度鬆手都可以收返；用咗嘅 Hints 唔退，已計嘅試錯唔取消。試玩版：廣告係假嘅，只會扮播 1 秒。",
   "rec-count": "📒 試玩記錄 {n} 盤",
   "rec-export-btn": "📋 匯出全部記錄",
   "rec-clear-btn": "🗑 清除記錄",
@@ -295,7 +324,7 @@ const STR = {
   "revive-btn-timer": "📺 睇廣告復活（+1 次機會 +60 秒）",
   "revive-restart": "重新開始呢盤",
   "revive-home": "返主頁",
-  "done-title": "完成！朵蓮花開咗",
+  "done-title": "完成！",
   "done-stat-diff": "難度",
   "done-stat-seed": "種子",
   "done-stat-time": "用時",
@@ -313,12 +342,12 @@ const STR = {
   "done-home": "返主頁揀過難度",
   "ad-title": "廣告播放中…",
   "ad-text": "（試玩版假廣告，正式版先會播真廣告）",
-  "footer": "Lotus Blocks 試玩版 v0.4.2：用嚟試手感，未係完成品。每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。",
+  "footer": "Lotus Blocks 試玩版 v0.4.3：用嚟試手感，未係完成品。每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。",
   "lang-toggle": "English"
  },
  "en": {
-  "page-title": "Lotus Blocks — Playtest v0.4.2",
-  "header-sub": "Playtest v0.4.2",
+  "page-title": "Lotus Blocks — Playtest v0.4.3",
+  "header-sub": "Playtest v0.4.3",
   "menu-intro": "A full sudoku solution is cut into pieces. Drag every piece back into the 9×9 grid so each row, column and 3×3 box has 1–9 with no repeats. Dark red pieces are <b>locked</b>: they start in place and can't move, so leave them. Pink pieces wait in the tray below. Drag them up. The <b>Hints</b> button at the top shows where your next piece would clash. Each puzzle comes from a seed (its puzzle code), and the same seed always gives the same puzzle.",
   "diff-easy-label": "Easy",
   "diff-normal-label": "Normal",
@@ -336,7 +365,12 @@ const STR = {
   "timer-label": "Timer (countdown)",
   "timer-desc": "Time limit = pieces to place × 30 sec. Off by default on Easy and Normal, on for Hard. You can switch it on or off at any level.",
   "start-btn": "Start",
-  "howto-note": "Playtest build: ads are fake. They just pretend to play for 1 second. The Hints button is at the top. Tap it before you drag, and your next piece will show which cells clash. A Hint is only used when you drop the piece. Free Hints: 8 on Easy, 5 on Normal and Hard. Tap again to cancel. Without a Hint, dragging only shows whether a piece overlaps others. When you run out, the same button turns into \"Hints +2\". Watch an ad to get 2 more, up to 2 times per game. Your next piece gets a Hint straight away. You can't buy more until you run out. A wrong drop won't end the game. Clashing cells turn red, and each drop with a clash counts as 1 mistake. You can make 3. Out of mistakes (or time)? Watch an ad to revive: you get 1 more mistake, plus 60 sec if the timer is on. Up to 2 revives per game, counted separately from buying Hints. To take back a placed piece, drag it off the board and let go anywhere. Used Hints aren't refunded, and mistakes already counted stay.",
+    "howto-hints-title": "Using Hints",
+  "howto-hints": "The Hints button is at the top. Tap it before you drag, and your next piece will show which cells clash. A Hint is only used when you drop the piece. Free Hints: 8 on Easy, 5 on Normal and Hard. Tap again to cancel. Without a Hint, dragging only shows whether a piece overlaps others. When you run out, the same button turns into \"Hints +2\". Watch an ad to get 2 more, up to 2 times per game. Your next piece gets a Hint straight away. You can't buy more until you run out.",
+  "howto-revive-title": "Mistakes and revives",
+  "howto-revive": "A wrong drop won't end the game. Clashing cells turn red, and each drop with a clash counts as 1 mistake. You can make 3. Out of mistakes (or time)? Watch an ad to revive: you get 1 more mistake, plus 60 sec if the timer is on. Up to 2 revives per game, counted separately from buying Hints.",
+  "howto-recycle-title": "Taking pieces back",
+  "howto-recycle": "To take back a placed piece, drag it off the board and let go anywhere. Used Hints aren't refunded, and mistakes already counted stay. Playtest build: ads are fake. They just pretend to play for 1 second.",
   "rec-count": "📒 {n} games logged",
   "rec-export-btn": "📋 Export all",
   "rec-clear-btn": "🗑 Clear log",
@@ -375,7 +409,7 @@ const STR = {
   "revive-btn-timer": "📺 Watch ad to revive (+1 chance, +60s)",
   "revive-restart": "Restart this puzzle",
   "revive-home": "Home",
-  "done-title": "Solved! Your lotus is in bloom",
+  "done-title": "Solved!",
   "done-stat-diff": "Level",
   "done-stat-seed": "Seed",
   "done-stat-time": "Time",
@@ -393,7 +427,7 @@ const STR = {
   "done-home": "Home (pick a level)",
   "ad-title": "Ad playing…",
   "ad-text": "(Fake ad for the playtest. The full game will show real ads.)",
-  "footer": "Lotus Blocks Playtest v0.4.2, made for testing the feel. It's not the finished game. Every game is logged. Tap \"Export all\" on the home screen to copy them all for the developer.",
+  "footer": "Lotus Blocks Playtest v0.4.3, made for testing the feel. It's not the finished game. Every game is logged. Tap \"Export all\" on the home screen to copy them all for the developer.",
   "lang-toggle": "中文"
  }
 };
@@ -554,7 +588,7 @@ function renderHud(){
   $("hudSeedChip").innerHTML = T("hud-seed").replace("{seed}", "<b>" + G.board.seed + "</b>");
   const shown = G.timerOn ? (G.limit - G.elapsed) : G.elapsed;
   $("hudTime").innerHTML = (G.timerOn ? T("hud-time-countdown") : T("hud-time")).replace("{time}", "<b>" + fmt(shown) + "</b>");
-  $("hudTime").style.color = (G.timerOn && shown <= 60 && G.state==="playing") ? "var(--bad)" : "";
+  $("hudTime").style.color = (G.timerOn && shown <= 60 && G.state==="playing") ? "var(--error)" : "";
   $("hudErr").innerHTML = T("hud-mistakes").replace("{n}", "<b>" + G.errors + "</b>").replace("{max}", 3 + G.revives);
   const pv = $("hudPv");
   if(G.previewLeft > 0){
@@ -647,7 +681,7 @@ function checkWin(){
   showOv("doneOv");
 }
 function resultText(){
-  return `Lotus Blocks 試手 v0.4.2｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
+  return `Lotus Blocks 試手 v0.4.3｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
 }
 </script>
 
@@ -712,7 +746,7 @@ function recordGame(result){
   const rs = loadRecords();
   const rec = {
     id: Date.now() + "-" + Math.floor(Math.random()*1e6),
-    ver:"v0.4.2", at:new Date().toISOString(),
+    ver:"v0.4.3", at:new Date().toISOString(),
     diff: DIFF_LABEL[G.mdiff], seed: G.board.seed, device: PLAY_DEVICE,
     secs: Math.round(G.elapsed), errors: G.errors, revives: G.revives, recycles: G.recycles || 0,
     pvAds: G.previewAds, timer: !!G.timerOn, result,
@@ -752,7 +786,7 @@ async function copyText(txt){
 $("recExportBtn").onclick = async ()=>{
   const rs = loadRecords();
   if(!rs.length){ $("recExportBtn").textContent = T("rec-export-empty"); setTimeout(refreshRecBtn, 1800); return; }
-  const txt = `Lotus Blocks 試玩記錄（v0.4.2，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
+  const txt = `Lotus Blocks 試玩記錄（v0.4.3，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
   const ok = await copyText(txt);
   $("recExportBtn").textContent = ok ? T("rec-export-ok") : T("rec-export-fail");
   setTimeout(refreshRecBtn, 2200);
@@ -1001,7 +1035,12 @@ function applyLang(){
   $("timerLabel").textContent = T("timer-label");
   $("timerDesc").textContent = T("timer-desc");
   $("startBtn").textContent = T("start-btn");
-  $("howtoNote").textContent = T("howto-note");
+  $("howtoHintsTitle").textContent = T("howto-hints-title");
+  $("howtoHints").textContent = T("howto-hints");
+  $("howtoReviveTitle").textContent = T("howto-revive-title");
+  $("howtoRevive").textContent = T("howto-revive");
+  $("howtoRecycleTitle").textContent = T("howto-recycle-title");
+  $("howtoRecycle").textContent = T("howto-recycle");
   $("recExportBtn").textContent = T("rec-export-btn");
   $("recClearBtn").textContent = T("rec-clear-btn");
   $("recNote").textContent = T("rec-note");
