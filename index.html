@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Lotus Blocks — 試玩版 v0.4.3</title>
+<title>Lotus Blocks — 試玩版 v0.4.4</title>
 <style>
   :root{
     --bg:#eef4f1; --surface:#fffdf8; --surface-raised:#ffffff; --surface-tint:#f3f8f5;
@@ -137,7 +137,7 @@
 <div class="wrap">
   <header class="top">
     <h1>Lotus Blocks</h1>
-    <div class="sub" id="headerSub">試玩版 v0.4.3 · PLAYTEST</div>
+    <div class="sub" id="headerSub">試玩版 v0.4.4 · PLAYTEST</div>
   </header>
 
   <!-- ======== MENU ======== -->
@@ -202,7 +202,7 @@
     <div id="tray"></div>
   </section>
 
-  <footer id="pageFooter">Lotus Blocks 試玩版 v0.4.3：用嚟試手感，未係完成品。<br>每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。</footer>
+  <footer id="pageFooter">Lotus Blocks 試玩版 v0.4.4：用嚟試手感，未係完成品。<br>每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。</footer>
 </div>
 
 <!-- ======== PAUSE ======== -->
@@ -261,8 +261,8 @@ const PREVIEW_FREE = {easy:8, normal:5, hard:5};
    記錄格式（recordLine／export header／resultText 欄位名）不動，只升版號。 */
 const STR = {
  "zh": {
-  "page-title": "Lotus Blocks — 試玩版 v0.4.3",
-  "header-sub": "試玩版 v0.4.3 · PLAYTEST",
+  "page-title": "Lotus Blocks — 試玩版 v0.4.4",
+  "header-sub": "試玩版 v0.4.4 · PLAYTEST",
   "menu-intro": "一盤完整數獨答案切成好多件方塊。將方塊全部拖返入 9×9 格，令每行、每列、每個 3×3 宮都係 1–9 唔重複，就完成。深紅色係<b>定版件</b>：開局已經放好、鎖死，唔使理。粉紅色方塊喺下面件盤，拖上去放。上面「<b>Hints</b>」掣會話你知下一件放落邊度會撞數。每盤由種子（即係盤號）生成，同一個種子永遠同一盤。",
   "diff-easy-label": "簡單",
   "diff-normal-label": "普通",
@@ -342,12 +342,12 @@ const STR = {
   "done-home": "返主頁揀過難度",
   "ad-title": "廣告播放中…",
   "ad-text": "（試玩版假廣告，正式版先會播真廣告）",
-  "footer": "Lotus Blocks 試玩版 v0.4.3：用嚟試手感，未係完成品。每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。",
+  "footer": "Lotus Blocks 試玩版 v0.4.4：用嚟試手感，未係完成品。每盤成績都會自動記錄，喺主頁撳「匯出全部記錄」，就可以一次過貼返俾開發者。",
   "lang-toggle": "English"
  },
  "en": {
-  "page-title": "Lotus Blocks — Playtest v0.4.3",
-  "header-sub": "Playtest v0.4.3",
+  "page-title": "Lotus Blocks — Playtest v0.4.4",
+  "header-sub": "Playtest v0.4.4",
   "menu-intro": "A full sudoku solution is cut into pieces. Drag every piece back into the 9×9 grid so each row, column and 3×3 box has 1–9 with no repeats. Dark red pieces are <b>locked</b>: they start in place and can't move, so leave them. Pink pieces wait in the tray below. Drag them up. The <b>Hints</b> button at the top shows where your next piece would clash. Each puzzle comes from a seed (its puzzle code), and the same seed always gives the same puzzle.",
   "diff-easy-label": "Easy",
   "diff-normal-label": "Normal",
@@ -427,7 +427,7 @@ const STR = {
   "done-home": "Home (pick a level)",
   "ad-title": "Ad playing…",
   "ad-text": "(Fake ad for the playtest. The full game will show real ads.)",
-  "footer": "Lotus Blocks Playtest v0.4.3, made for testing the feel. It's not the finished game. Every game is logged. Tap \"Export all\" on the home screen to copy them all for the developer.",
+  "footer": "Lotus Blocks Playtest v0.4.4, made for testing the feel. It's not the finished game. Every game is logged. Tap \"Export all\" on the home screen to copy them all for the developer.",
   "lang-toggle": "中文"
  }
 };
@@ -681,7 +681,7 @@ function checkWin(){
   showOv("doneOv");
 }
 function resultText(){
-  return `Lotus Blocks 試手 v0.4.3｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
+  return `Lotus Blocks 試手 v0.4.4｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
 }
 </script>
 
@@ -746,7 +746,7 @@ function recordGame(result){
   const rs = loadRecords();
   const rec = {
     id: Date.now() + "-" + Math.floor(Math.random()*1e6),
-    ver:"v0.4.3", at:new Date().toISOString(),
+    ver:"v0.4.4", at:new Date().toISOString(),
     diff: DIFF_LABEL[G.mdiff], seed: G.board.seed, device: PLAY_DEVICE,
     secs: Math.round(G.elapsed), errors: G.errors, revives: G.revives, recycles: G.recycles || 0,
     pvAds: G.previewAds, timer: !!G.timerOn, result,
@@ -786,7 +786,7 @@ async function copyText(txt){
 $("recExportBtn").onclick = async ()=>{
   const rs = loadRecords();
   if(!rs.length){ $("recExportBtn").textContent = T("rec-export-empty"); setTimeout(refreshRecBtn, 1800); return; }
-  const txt = `Lotus Blocks 試玩記錄（v0.4.3，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
+  const txt = `Lotus Blocks 試玩記錄（v0.4.4，共 ${rs.length} 盤）\n` + rs.map(recordLine).join("\n");
   const ok = await copyText(txt);
   $("recExportBtn").textContent = ok ? T("rec-export-ok") : T("rec-export-fail");
   setTimeout(refreshRecBtn, 2200);
@@ -977,7 +977,7 @@ window.addEventListener("pointercancel", ()=>{ if(G && G.drag) endDrag(false); }
 /* ---------- sizing & init ---------- */
 function trayHeightEstimate(shapes, trayCell, innerW){
   const gap = 8;
-  let total = 22, rowW = 0, rowH = 0, started = false;
+  let total = 26, rowW = 0, rowH = 0, started = false;   // 26 = 件盤 padding 12×2 + border 1×2（in-game #tray）
   for(const shp of shapes){
     const pw = shp.w * trayCell + (shp.w - 1) * 2 + 6;
     const ph = shp.h * trayCell + (shp.h - 1) * 2 + 6;
@@ -1000,18 +1000,24 @@ function fitCell(){
     return;
   }
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  // 底部預留：in-app 瀏覽器底部浮動列（約 57px，visualViewport 報唔到）＋一件盤行高，
+  // 件盤最底一行要成行企喺浮動列之上，唔係淨係掂到邊。2026-10-31 v0.4.4 實測回報。
+  const CHROME_RESERVE = 108;
+  const budget = vh - CHROME_RESERVE;
   const applyLock = total => document.body.classList.toggle("scroll-locked", total <= vh);
   const headerEl = document.querySelector("header.top");
   const hudEl = document.querySelector(".hud");
   const titleEl = document.querySelector(".tray-title");
-  const fixed = 18 + (headerEl ? headerEl.offsetHeight : 24) + (hudEl ? hudEl.offsetHeight : 64)
-              + 6 + 8 + 10 + (titleEl ? titleEl.offsetHeight : 18) + 6 + 12;
-  const trayInnerW = contentW - 22;
+  // fixed：wrap 上 padding 8 + header + hud margin 8 + hud + board-wrap margin 8
+  //        + tray-title margin 12 + title + tray margin 8 + wrap 下 padding 12
+  const fixed = 8 + (headerEl ? headerEl.offsetHeight : 24) + 8 + (hudEl ? hudEl.offsetHeight : 64)
+              + 8 + 12 + (titleEl ? titleEl.offsetHeight : 18) + 8 + 12;
+  const trayInnerW = contentW - 26;   // 件盤 padding 12×2 + border 1×2
   let chosen = null, chosenTotal = null;
   for(let cell = Math.min(50, widthCell); cell >= 23; cell--){
     const trayCell = Math.max(11, Math.min(21, Math.round(cell * 0.48)));
     const total = fixed + cell * 9 + 14 + trayHeightEstimate(G.initialTray, trayCell, trayInnerW);
-    if(total <= vh){ chosen = {cell, trayCell}; chosenTotal = total; break; }
+    if(total <= budget){ chosen = {cell, trayCell}; chosenTotal = total; break; }
   }
   if(!chosen){
     chosen = {cell:23, trayCell:11};
