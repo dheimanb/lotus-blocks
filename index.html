@@ -8,7 +8,9 @@
   /* Looseleaf trial skin (branch style/looseleaf, skin-only): hand-drawn aesthetic
      borrowed from Looseleaf (MIT, https://github.com/kevintngo/looseleaf) — paper
      background, ink outlines, wobbly radii, sticker badge. Paper grain: 5% SVG
-     fractal-noise tile under the ruled lines (body background only). Game logic untouched.
+     fractal-noise tile under the ruled lines (body background only). Menu surfaces
+     (.card/.diff-btn/.timer-row/.seed-chip) get an 8% low-frequency wrinkle tile.
+     Game logic untouched.
      Kevin Sans has NO CJK glyphs (verified: 147 glyphs, Latin only), so Chinese
      text falls through to the PingFang/Microsoft JhengHei stack unchanged. */
   @import url("https://kevintngo.github.io/looseleaf/fonts/kevin-sans.css");
@@ -138,6 +140,8 @@
   .seed-modes{display:flex;flex-wrap:wrap;gap:var(--sp-sm);margin-top:var(--sp-md)}
   .seed-chip{border:2px solid var(--line);background:var(--surface-raised);border-radius:var(--r-sketch-sm);padding:var(--sp-sm) var(--sp-md);font-size:15px;cursor:pointer;color:var(--ink)}
   .seed-chip.sel{border-color:var(--accent);background:var(--accent-soft)}
+  /* Menu paper wrinkles: low-frequency fractal noise reads as small creases (skin-only, menu surfaces only; start button + text input left clean). */
+  .card,.diff-btn,.diff-btn.sel,.timer-row,.seed-chip,.seed-chip.sel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)' opacity='0.08'/%3E%3C/svg%3E");background-size:360px 360px}
   .seed-input{width:100%;margin-top:var(--sp-md);border:2px solid var(--line);border-radius:var(--r-sketch-sm);padding:var(--sp-sm) var(--sp-md);font-size:1rem;background:var(--surface-raised);color:var(--ink);caret-color:var(--accent)}
   #toast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:90;width:max-content;max-width:min(92vw,520px);text-align:center;background:var(--toast-bg);border:1px solid var(--toast-line);color:var(--toast-ink);border-radius:var(--r-sketch-sm);padding:var(--sp-sm) var(--sp-lg);font-size:14px;line-height:1.55;box-shadow:0 8px 24px rgba(46,58,52,.25);pointer-events:none}
   #toast.show{display:block}
