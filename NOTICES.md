@@ -30,3 +30,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Paper texture tiles (Looseleaf)
+
+The files in `textures/` (paper-fibre.png, paper-relief.png, paper-cloud.png)
+are verbatim copies of baked tiles from Looseleaf
+(https://github.com/kevintngo/looseleaf), distributed under the MIT License
+reproduced in this file. They implement the cold-tooth surface of the Paper
+stock="card" sheet used for the menu.
