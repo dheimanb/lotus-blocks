@@ -61,10 +61,10 @@
     --font-digit:"Caveat","Kevin Sans","ChenYuluoyan 2.0 Thin",system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  /* 雙擊放大根治：touch-action:manipulation 放喺根層級，等成個遊戲範圍都唔觸發 iOS double-tap zoom；
-     pinch zoom 照用到。上一輪只放喺 .lotus 上面唔夠——tap 目標經常係 SVG 嘅 <path> 或者周圍嘅
-     .tray-title／舞台，唔係 .lotus 本身；而且 dblclick preventDefault 攔唔到 iOS 手勢層級嘅 zoom 判斷。 */
-  html,body{touch-action:manipulation}
+  /* 第 4 輪 A：根層級由 manipulation 改做 pan-y——選單畫面 body 冇 in-game，上一輪 body.in-game{pan-y} 嗰陣選單係唔受保護嘅；
+     pan-y 全版禁 pinch（選單垂直捲動照行，橫向捲動本來就唔用）。double-tap zoom 唔靠呢度（實證：三輪 touch-action 都擋唔到），
+     靠下面 touchend 時間＋距離 guard。 */
+  html,body{touch-action:pan-y}
   :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
   ::selection{background:var(--accent-soft)}
   .card p,.note,.panel p{text-wrap:pretty}
@@ -120,7 +120,8 @@
   /* 第 3 輪 A：遊戲期間全版禁 pinch／double-tap zoom。touch-action 取交集：body 呢層 pan-y 令所有 in-game 觸點
      （件盤標題、蓮花、HUD、舞台）都唔再觸發縮放；垂直捲動照行（lock off 嗰陣要捲去件盤）；拖放目標本身係 none，
      pointer 事件唔受影響。pinch zoom 唔係需求，唔保留。上一輪 html,body manipulation 只禁 double-tap、放行 pinch，
-     加埋 viewport user-scalable=no 俾 iOS 10+ 忽略，就係放大入得去、縮唔返出嚟嘅成因。 */
+     加埋 viewport user-scalable=no 俾 iOS 10+ 忽略，就係放大入得去、縮唔返出嚟嘅成因。
+     第 4 輪 A 更正：實證 pan-y 擋到 pinch 但擋唔到 double-tap zoom，double-tap 靠下面 touchend guard；呢條留返禁 pinch。 */
   body.in-game{touch-action:pan-y}
   .chip-btn.pv-buy{border-color:var(--accent-strong);color:var(--accent-strong);font-weight:700}
   /* ---------- board ---------- */
@@ -242,6 +243,8 @@
   .menu-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
   .lotus-spot{text-align:center;margin-top:var(--sp-lg);touch-action:manipulation}
   .lotus{flex:none;filter:drop-shadow(3px 5px 0 rgba(38,52,44,.22));transform:rotate(1.6deg);touch-action:manipulation}
+  /* 第 4 輪 A：double-tap 嘅 tap target 係 SVG 嘅 <path>／標題文字本身，唔係 .lotus／.tray-title——touch-action 要落喺真正嘅 tap target 上面。 */
+  .lotus-spot *,.tray-title,.tray-title *{touch-action:manipulation}
   /* 選單紙（感覺稿 .board-sheet 撕邊逐字） */
   #menu{background-color:var(--card-hi);background-image:var(--tooth-img);background-size:var(--tooth-size);border:0;border-radius:0;box-shadow:none;clip-path:polygon(0.6% 3%, 3% 0.6%, 34% 0%, 68% 1.2%, 96% 0.4%, 99.6% 2.6%, 100% 32%, 99.4% 66%, 100% 95%, 97% 99.6%, 61% 100%, 28% 99.2%, 2% 100%, 0% 96%, 0.5% 60%, 0% 28%);filter:var(--card-drop)}
   /* 盤紙墊：喺 #board 後面，唔郁 layout（fitCell 量度唔受影響） */
@@ -830,6 +833,7 @@ function checkWin(){
   ];
   $("doneStats").innerHTML = srows.map((r,i)=>`${r[0]} <b class="wval" style="animation-delay:${(i*0.12).toFixed(2)}s">${r[1]}</b>`).join("<br>");
   showOv("doneOv");
+  G.winAt = Date.now(); /* 第 4 輪 C：記低完成畫面出現嘅時間，撳成績區嗰個 handler 用嚟分辨 win-tap 合成 click（動畫期間到）同真正想即刻寫完嘅撳 */
   /* 第 3 輪 C：等 overlay 真係顯示／畫咗先加 .writing，書寫動畫先至開始，唔會喺隱藏嗰陣播完 */
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ $("doneStats").classList.add("writing"); }));
 }
@@ -879,7 +883,7 @@ $("reviveRestartBtn").onclick = ()=>{ const b=G.board, t=G.timerOn, m=G.mdiff; h
 $("reviveHomeBtn").onclick = goHome;
 $("againBtn").onclick = ()=>{ const b=G.board, t=G.timerOn, m=G.mdiff; hideOv("doneOv"); newGame(b,t,m); };
 /* 撳成績區：書寫效果即刻寫完 */
-$("doneStats").addEventListener("click", ()=>{ if($("doneStats").classList.contains("writing")) $("doneStats").classList.add("wrote"); }); /* 第 3 輪 C：動畫未開始之前嘅 click（例如最後一放嗰下 win-tap）唔應該即刻寫完 */
+$("doneStats").addEventListener("click", ()=>{ if(G && Date.now() - (G.winAt||0) < 1500) return; /* 第 4 輪 C：完成畫面出現後 1.5 秒內嘅 click 一律唔理——實證：第 3 輪個 guard（只喺 writing 存在先寫完）冇效，即係合成 click 喺 double-rAF（約 2 幀）之後先到，嗰陣 writing 已經加咗，guard 反而放行；動畫總長約 1.3 秒，1.5 秒窗覆蓋埋佢，之後嘅撳先至即刻寫完（嗰陣 8 行已經寫晒，視覺上冇分別） */ if($("doneStats").classList.contains("writing")) $("doneStats").classList.add("wrote"); });
 $("doneHomeBtn").onclick = goHome;
 $("copyBtn").onclick = async ()=>{
   const txt = resultText();
@@ -1062,9 +1066,9 @@ function beginDrag(p, grabDr, grabDc, x, y, pointerType){
   const liftTarget = touch ? Math.round((p.h - grabDr + 0.2) * (cp + 1)) : 0;
   G.drag = {piece:p, grabDr, grabDc, prevAt, hover:null, cp,
             touch, liftTarget, lift: 0};
-  /* 第 3 輪 B：先清走任何殘留狀態（上一局／中途離開留低），再按需要加 drop-ok */
+  /* 第 4 輪 B：drop-ok 唔再喺 beginDrag 加——上一輪以為件盤粉紅係「殘留」，實證係 drop-ok 喺已放件成個拖放過程都著住（只得 beginDrag 一處加，拖件盤件嗰陣 prevAt 係 null 唔會加）；
+     截圖入面件拖緊喺盤面上面、件盤粉紅加紅邊，就係呢個 by-design 嘅 drop-ok，唔係清漏。家下件盤標示只喺 recycleReady（拖出盤外／拖去件盤上面）嗰陣先出（下面 pointermove 嘅 drop-hot），拖緊喺盤面上面嗰陣件盤保持原色。 */
   $("tray").classList.remove("drop-ok","drop-hot");
-  if(prevAt) $("tray").classList.add("drop-ok");
   renderTray(); renderBoard();
   moveGhost(x, y);
   updatePreview(x, y);
@@ -1139,6 +1143,18 @@ window.addEventListener("pointercancel", ()=>{ if(G && G.drag) endDrag(false); }
 /* 第 3 輪 A：iOS 手勢層級攔截——touch-action 萬一喺 in-app webview 唔生效，gesturestart 呢層都攔到 pinch-zoom。
    單指捲動唔會觸發 gesturestart，拖放行 pointer 事件，兩者都唔受影響。 */
 document.addEventListener("gesturestart", e=>{ e.preventDefault(); }, {passive:false});
+/* 第 4 輪 A：iOS double-tap zoom 唔受 touch-action 管——實證：三輪 touch-action（蓮花 manipulation／根層級 manipulation／in-game pan-y）都擋唔到雙擊，
+   但同樣規則擋到 pinch，說明 double-tap zoom 喺呢個 Safari 行另一條路，唔係 touch-action 交集。用 touchend 時間＋距離 guard：
+   同一位置 300ms 內第二下 touchend 直接 preventDefault，取消 double-tap zoom（同埋嗰下合成 click）；唔同位置嘅快速連點唔受影響，
+   拖緊件嗰陣唔觸發（G.drag 在），拖放行 pointer 事件唔受影響。 */
+let lastTapEnd = 0, lastTapX = 0, lastTapY = 0;
+document.addEventListener("touchend", e=>{
+  if(G && G.drag) return;
+  const now = Date.now(), t = e.changedTouches[0];
+  if(!t) return;
+  if(now - lastTapEnd <= 300 && Math.abs(t.clientX - lastTapX) < 48 && Math.abs(t.clientY - lastTapY) < 48) e.preventDefault();
+  lastTapEnd = now; lastTapX = t.clientX; lastTapY = t.clientY;
+}, {passive:false});
 document.querySelectorAll(".lotus").forEach(el=>{
   el.addEventListener("dblclick", e=>{ e.preventDefault(); e.stopPropagation(); });
 });
