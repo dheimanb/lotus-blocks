@@ -145,3 +145,13 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
+## Caveat (Google Fonts)
+
+The font files in `fonts/` (Caveat-Regular.woff2, Caveat-Bold.woff2) are
+static instances of Caveat (https://github.com/googlefonts/caveat),
+instantiated from the variable font at weights 400 and 700; no glyphs were
+modified. Caveat is distributed under the SIL Open Font License, Version
+1.1, reproduced in the ChenYuluoyan section above.
+
+Copyright 2014 The Caveat Project Authors (https://github.com/googlefonts/caveat)
