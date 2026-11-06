@@ -117,6 +117,11 @@
   /* v0.4.1 入局鎖滑動：求解器話入到先鎖，極矮屏就唔鎖（寧願滑好過睇唔到件盤） */
   body.in-game.scroll-locked{position:fixed;width:100%;overflow:hidden;overscroll-behavior:none}
   body.in-game.scroll-locked #game{touch-action:none}
+  /* 第 3 輪 A：遊戲期間全版禁 pinch／double-tap zoom。touch-action 取交集：body 呢層 pan-y 令所有 in-game 觸點
+     （件盤標題、蓮花、HUD、舞台）都唔再觸發縮放；垂直捲動照行（lock off 嗰陣要捲去件盤）；拖放目標本身係 none，
+     pointer 事件唔受影響。pinch zoom 唔係需求，唔保留。上一輪 html,body manipulation 只禁 double-tap、放行 pinch，
+     加埋 viewport user-scalable=no 俾 iOS 10+ 忽略，就係放大入得去、縮唔返出嚟嘅成因。 */
+  body.in-game{touch-action:pan-y}
   .chip-btn.pv-buy{border-color:var(--accent-strong);color:var(--accent-strong);font-weight:700}
   /* ---------- board ---------- */
   .board-wrap{position:relative;display:flex;justify-content:center;margin-top:var(--sp-md)}
@@ -173,11 +178,14 @@
   .stats{text-align:left;margin:var(--sp-md) auto var(--sp-xs);max-width:280px;line-height:1.9;font-size:15px;font-family:var(--font-hand)}
   .stats b{float:right;font-variant-numeric:tabular-nums}
   /* 成績書寫效果：左邊標識即刻見到，右邊數值由第一項開始逐行「寫」出嚟（左至右揭開）；
-     撳成績區即刻寫完；prefers-reduced-motion 就唔播動畫。 */
-  .stats .wval{clip-path:inset(0 100% 0 0);animation:writein .45s ease-out forwards}
+     撳成績區即刻寫完；prefers-reduced-motion 就唔播動畫。
+     第 3 輪 C：動畫唔再喺 innerHTML 嗰刻就開始——.wval 預設只係隱藏狀態，動畫只喺 overlay 顯示後加咗 .writing 先跑；
+     否則動畫可能喺容器仲隱藏嗰陣已經播完，或者俾最後一放嗰下 win-tap click 即刻寫完，見到嗰陣全部寫晒。 */
+  .stats .wval{display:inline-block;clip-path:inset(0 100% 0 0)}
+  .stats.writing .wval{animation:writein .45s ease-out forwards}
   @keyframes writein{to{clip-path:inset(0 0 0 0)}}
   .stats.wrote .wval{animation:none;clip-path:none}
-  @media (prefers-reduced-motion: reduce){.stats .wval{animation:none;clip-path:none}}
+  @media (prefers-reduced-motion: reduce){.stats .wval,.stats.writing .wval{animation:none;clip-path:none}}
   /* lotus bloom */
   /* 完成畫面摺紙蓮花 v2：三層鳶形瓣（唔係錨嗰朵摺法）——每片係尖頂鳶形（clip-path），
      中線摺痕＋左右兩面色差扮摺紙摺面；由花苞（細＋摺埋）逐層展開到盛開。 */
@@ -744,6 +752,7 @@ function newGame(board, timerOn, mdiff){
         elapsed:0, state:"playing",
         drag:null, preview:null };
   $("board").innerHTML = "";
+  $("tray").classList.remove("drop-ok","drop-hot"); /* 第 3 輪 B：開局 reset，唔帶上一局殘留 */
   hideOv("reviveOv"); hideOv("doneOv"); hideOv("pauseOv");
   fitCell();
   renderAll();
@@ -808,6 +817,7 @@ function checkWin(){
   const core = document.createElement("div"); core.className = "core"; bloom.appendChild(core);
   /* 成績書寫效果：逐行起，左邊標識固定，右邊數值由第一項開始「寫」出嚟 */
   $("doneStats").classList.remove("wrote");
+  $("doneStats").classList.remove("writing");
   const srows = [
     [T("done-stat-diff"), T("diff-"+G.mdiff+"-label")],
     [T("done-stat-seed"), G.board.seed],
@@ -820,6 +830,8 @@ function checkWin(){
   ];
   $("doneStats").innerHTML = srows.map((r,i)=>`${r[0]} <b class="wval" style="animation-delay:${(i*0.12).toFixed(2)}s">${r[1]}</b>`).join("<br>");
   showOv("doneOv");
+  /* 第 3 輪 C：等 overlay 真係顯示／畫咗先加 .writing，書寫動畫先至開始，唔會喺隱藏嗰陣播完 */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ $("doneStats").classList.add("writing"); }));
 }
 function resultText(){
   return `Lotus Blocks 試手 v0.4.4｜難度：${DIFF_LABEL[G.mdiff]}｜種子：${G.board.seed}｜用時：${fmt(G.elapsed)}｜試錯：${G.errors}｜復活：${G.revives}｜回收：${G.recycles}｜買預覽：${G.previewAds}｜限時：${G.timerOn ? "有" : "冇"}｜預覽耗盡：${G.pvCliff === null ? "未耗盡" : "剩 " + G.pvCliff + " 件"}`;
@@ -836,6 +848,7 @@ function fakeAd(cb){
 }
 function goHome(){
   recordAbandon();
+  $("tray").classList.remove("drop-ok","drop-hot"); /* 第 3 輪 B：中途離開嗰陣 endDrag 永遠唔會跑，呢度清走殘留 */
   G = null;
   document.body.classList.remove("in-game", "scroll-locked");
   ["pauseOv","reviveOv","doneOv","adOv"].forEach(hideOv);
@@ -845,6 +858,7 @@ function goHome(){
 }
 function pauseGame(){
   if(!G || G.state!=="playing") return;
+  if(G.drag) endDrag(false); /* 第 3 輪 B：拖緊件嗰陣暫停（包括 visibilitychange 自動暫停），先還原件清狀態，唔留 stale drag */
   G.state = "paused";
   $("pauseTime").textContent = G.timerOn ? T("pause-time-left").replace("{time}", fmt(G.limit - G.elapsed)) : fmt(G.elapsed);
   showOv("pauseOv");
@@ -865,7 +879,7 @@ $("reviveRestartBtn").onclick = ()=>{ const b=G.board, t=G.timerOn, m=G.mdiff; h
 $("reviveHomeBtn").onclick = goHome;
 $("againBtn").onclick = ()=>{ const b=G.board, t=G.timerOn, m=G.mdiff; hideOv("doneOv"); newGame(b,t,m); };
 /* 撳成績區：書寫效果即刻寫完 */
-$("doneStats").addEventListener("click", ()=>{ $("doneStats").classList.add("wrote"); });
+$("doneStats").addEventListener("click", ()=>{ if($("doneStats").classList.contains("writing")) $("doneStats").classList.add("wrote"); }); /* 第 3 輪 C：動畫未開始之前嘅 click（例如最後一放嗰下 win-tap）唔應該即刻寫完 */
 $("doneHomeBtn").onclick = goHome;
 $("copyBtn").onclick = async ()=>{
   const txt = resultText();
@@ -1048,6 +1062,8 @@ function beginDrag(p, grabDr, grabDc, x, y, pointerType){
   const liftTarget = touch ? Math.round((p.h - grabDr + 0.2) * (cp + 1)) : 0;
   G.drag = {piece:p, grabDr, grabDc, prevAt, hover:null, cp,
             touch, liftTarget, lift: 0};
+  /* 第 3 輪 B：先清走任何殘留狀態（上一局／中途離開留低），再按需要加 drop-ok */
+  $("tray").classList.remove("drop-ok","drop-hot");
   if(prevAt) $("tray").classList.add("drop-ok");
   renderTray(); renderBoard();
   moveGhost(x, y);
@@ -1109,7 +1125,7 @@ $("board").addEventListener("pointerdown", e=>{
   beginDrag(p, r - p.at.r, c - p.at.c, e.clientX, e.clientY, e.pointerType);
 });
 window.addEventListener("pointermove", e=>{
-  if(!G || !G.drag) return;
+  if(!G || !G.drag){ $("tray").classList.remove("drop-ok","drop-hot"); return; } /* 第 3 輪 B：冇拖緊嗰陣任何殘留 class 即刻清走 */
   moveGhost(e.clientX, e.clientY);
   updatePreview(e.clientX, e.clientY);
   if(G.drag.prevAt) $("tray").classList.toggle("drop-hot", recycleReady(e.clientX, e.clientY));
@@ -1118,7 +1134,11 @@ window.addEventListener("pointerup", e=>{ if(G && G.drag) endDrag(true, e.client
 window.addEventListener("pointercancel", ()=>{ if(G && G.drag) endDrag(false); });
 
 /* 摺紙蓮花係裝飾，唔應該有 tap 行為。dblclick 攔截攔唔到 iOS double-tap zoom（手勢層級決定，唔經 dblclick 事件），
-   真正禁 zoom 靠上面 html,body 嘅 touch-action:manipulation；呢度留返做多一重保險。 */
+   真正禁 zoom 靠 body.in-game 嘅 touch-action:pan-y（全版禁 pinch／double-tap zoom，垂直捲動照行）加下面 gesturestart 攔截；
+   呢度留返做多一重保險。 */
+/* 第 3 輪 A：iOS 手勢層級攔截——touch-action 萬一喺 in-app webview 唔生效，gesturestart 呢層都攔到 pinch-zoom。
+   單指捲動唔會觸發 gesturestart，拖放行 pointer 事件，兩者都唔受影響。 */
+document.addEventListener("gesturestart", e=>{ e.preventDefault(); }, {passive:false});
 document.querySelectorAll(".lotus").forEach(el=>{
   el.addEventListener("dblclick", e=>{ e.preventDefault(); e.stopPropagation(); });
 });
