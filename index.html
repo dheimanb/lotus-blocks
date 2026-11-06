@@ -61,6 +61,10 @@
     --font-digit:"Caveat","Kevin Sans","ChenYuluoyan 2.0 Thin",system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  /* 雙擊放大根治：touch-action:manipulation 放喺根層級，等成個遊戲範圍都唔觸發 iOS double-tap zoom；
+     pinch zoom 照用到。上一輪只放喺 .lotus 上面唔夠——tap 目標經常係 SVG 嘅 <path> 或者周圍嘅
+     .tray-title／舞台，唔係 .lotus 本身；而且 dblclick preventDefault 攔唔到 iOS 手勢層級嘅 zoom 判斷。 */
+  html,body{touch-action:manipulation}
   :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
   ::selection{background:var(--accent-soft)}
   .card p,.note,.panel p{text-wrap:pretty}
@@ -134,9 +138,18 @@
   @keyframes hintflash{from{box-shadow:inset 0 0 0 3px var(--accent)}to{box-shadow:inset 0 0 0 3px var(--gold)}}
   /* ---------- tray ---------- */
   .tray-title{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-sm);margin-top:var(--sp-lg);color:var(--ink-2);font-size:14px;letter-spacing:.14em;font-family:var(--font-hand)}
-  #tray{display:flex;flex-wrap:wrap;gap:var(--sp-md);margin-top:var(--sp-sm);background-color:var(--card-hi);background-image:var(--tooth-img);background-size:var(--tooth-size);border:1px solid transparent;border-radius:0;padding:var(--sp-md);min-height:74px;touch-action:none;transition:background .15s,border-color .15s;clip-path:polygon(1% 6%, 5% 1%, 42% 0%, 79% 2%, 98% 0%, 100% 26%, 99% 70%, 100% 94%, 95% 100%, 55% 98%, 18% 100%, 2% 99%, 0% 72%, 0.6% 30%);filter:var(--card-drop)}
+  #tray{position:relative;display:flex;flex-wrap:wrap;gap:var(--sp-md);margin-top:var(--sp-sm);background-color:var(--card-hi);background-image:var(--tooth-img);background-size:var(--tooth-size);border:1px solid transparent;border-radius:0;padding:var(--sp-md);min-height:74px;touch-action:none;transition:background .15s,border-color .15s;clip-path:polygon(1% 6%, 5% 1%, 42% 0%, 79% 2%, 98% 0%, 100% 26%, 99% 70%, 100% 94%, 95% 100%, 55% 98%, 18% 100%, 2% 99%, 0% 72%, 0.6% 30%);filter:var(--card-drop)}
   #tray.drop-ok{border-color:var(--accent);background:var(--accent-soft)}
-  #tray.drop-hot{border-style:solid;background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+  #tray.drop-hot{border-style:solid;background:var(--accent-soft)}
+  /* 放回件盤標示：紅圈要跟住撕邊紙形——inset box-shadow 只會畫長方形圈，唔跟 clip-path 嘅撕邊走，
+     所以上一版個圈同件盤點唔上（睇落仲係舊長方形版本）。改用兩個同一個撕邊 polygon 嘅偽元素畫：
+     紅底全大細＋粉紅底細 2px，上面嗰層遮住中間，淨低 2px 紅邊跟住撕邊走。 */
+  #tray::before,#tray::after{content:"";position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .15s;clip-path:polygon(1% 6%, 5% 1%, 42% 0%, 79% 2%, 98% 0%, 100% 26%, 99% 70%, 100% 94%, 95% 100%, 55% 98%, 18% 100%, 2% 99%, 0% 72%, 0.6% 30%)}
+  #tray::before{background:var(--accent)}
+  #tray::after{inset:2px;background:var(--accent-soft)}
+  #tray.drop-ok::after{opacity:1}
+  #tray.drop-hot::before,#tray.drop-hot::after{opacity:1}
+  #tray.drop-ok .tray-piece,#tray.drop-hot .tray-piece,#tray.drop-ok .tray-empty,#tray.drop-hot .tray-empty{position:relative;z-index:1}
   #board, #tray, .hud, .card, .tray-piece{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .tray-piece{display:grid;gap:2px;cursor:grab;touch-action:none;padding:3px;border-radius:6px;filter:drop-shadow(2.5px 4px 0 rgba(38,52,44,.22));transform:rotate(var(--rot,0deg))}
   .tray-piece:hover{background:var(--surface-tint)}
@@ -157,8 +170,14 @@
   .pbtn{display:block;width:100%;margin-top:var(--sp-md);border-radius:var(--r-lg);padding:var(--sp-md);font-size:1rem;cursor:pointer;border:1px solid var(--line);background-color:var(--card);color:var(--ink);font-family:var(--font-hand)}
   .pbtn.primary{background:var(--action);border-color:var(--action);color:#fff}
   .pbtn.primary:hover{background:var(--action-hover)}
-  .stats{text-align:left;margin:var(--sp-md) auto var(--sp-xs);max-width:280px;line-height:1.9;font-size:15px}
+  .stats{text-align:left;margin:var(--sp-md) auto var(--sp-xs);max-width:280px;line-height:1.9;font-size:15px;font-family:var(--font-hand)}
   .stats b{float:right;font-variant-numeric:tabular-nums}
+  /* 成績書寫效果：左邊標識即刻見到，右邊數值由第一項開始逐行「寫」出嚟（左至右揭開）；
+     撳成績區即刻寫完；prefers-reduced-motion 就唔播動畫。 */
+  .stats .wval{clip-path:inset(0 100% 0 0);animation:writein .45s ease-out forwards}
+  @keyframes writein{to{clip-path:inset(0 0 0 0)}}
+  .stats.wrote .wval{animation:none;clip-path:none}
+  @media (prefers-reduced-motion: reduce){.stats .wval{animation:none;clip-path:none}}
   /* lotus bloom */
   /* 完成畫面摺紙蓮花 v2：三層鳶形瓣（唔係錨嗰朵摺法）——每片係尖頂鳶形（clip-path），
      中線摺痕＋左右兩面色差扮摺紙摺面；由花苞（細＋摺埋）逐層展開到盛開。 */
@@ -787,9 +806,19 @@ function checkWin(){
     }
   }
   const core = document.createElement("div"); core.className = "core"; bloom.appendChild(core);
-  $("doneStats").innerHTML =
-    `${T("done-stat-diff")} <b>${T("diff-"+G.mdiff+"-label")}</b><br>${T("done-stat-seed")} <b>${G.board.seed}</b><br>${T("done-stat-time")} <b>${fmt(G.elapsed)}</b><br>` +
-    `${T("done-stat-mistakes")} <b>${T("done-val-count").replace("{n}", G.errors)}</b><br>${T("done-stat-revives")} <b>${T("done-val-count").replace("{n}", G.revives)}</b><br>${T("done-stat-recycles")} <b>${T("done-val-count").replace("{n}", G.recycles)}</b><br>${T("done-stat-hints-bought")} <b>${T("done-val-count").replace("{n}", G.previewAds)}</b><br>${T("done-stat-timer")} <b>${G.timerOn ? T("done-val-timer-on").replace("{time}", fmt(G.limit)) : T("done-val-timer-off")}</b>`;
+  /* 成績書寫效果：逐行起，左邊標識固定，右邊數值由第一項開始「寫」出嚟 */
+  $("doneStats").classList.remove("wrote");
+  const srows = [
+    [T("done-stat-diff"), T("diff-"+G.mdiff+"-label")],
+    [T("done-stat-seed"), G.board.seed],
+    [T("done-stat-time"), fmt(G.elapsed)],
+    [T("done-stat-mistakes"), T("done-val-count").replace("{n}", G.errors)],
+    [T("done-stat-revives"), T("done-val-count").replace("{n}", G.revives)],
+    [T("done-stat-recycles"), T("done-val-count").replace("{n}", G.recycles)],
+    [T("done-stat-hints-bought"), T("done-val-count").replace("{n}", G.previewAds)],
+    [T("done-stat-timer"), G.timerOn ? T("done-val-timer-on").replace("{time}", fmt(G.limit)) : T("done-val-timer-off")]
+  ];
+  $("doneStats").innerHTML = srows.map((r,i)=>`${r[0]} <b class="wval" style="animation-delay:${(i*0.12).toFixed(2)}s">${r[1]}</b>`).join("<br>");
   showOv("doneOv");
 }
 function resultText(){
@@ -835,6 +864,8 @@ $("reviveBtn").onclick = ()=> fakeAd(()=>{
 $("reviveRestartBtn").onclick = ()=>{ const b=G.board, t=G.timerOn, m=G.mdiff; hideOv("reviveOv"); newGame(b,t,m); };
 $("reviveHomeBtn").onclick = goHome;
 $("againBtn").onclick = ()=>{ const b=G.board, t=G.timerOn, m=G.mdiff; hideOv("doneOv"); newGame(b,t,m); };
+/* 撳成績區：書寫效果即刻寫完 */
+$("doneStats").addEventListener("click", ()=>{ $("doneStats").classList.add("wrote"); });
 $("doneHomeBtn").onclick = goHome;
 $("copyBtn").onclick = async ()=>{
   const txt = resultText();
@@ -1086,7 +1117,8 @@ window.addEventListener("pointermove", e=>{
 window.addEventListener("pointerup", e=>{ if(G && G.drag) endDrag(true, e.clientX, e.clientY); });
 window.addEventListener("pointercancel", ()=>{ if(G && G.drag) endDrag(false); });
 
-/* 摺紙蓮花係裝飾，唔應該有 tap 行為：禁雙擊放大（iOS double-tap zoom 會卡住畫面） */
+/* 摺紙蓮花係裝飾，唔應該有 tap 行為。dblclick 攔截攔唔到 iOS double-tap zoom（手勢層級決定，唔經 dblclick 事件），
+   真正禁 zoom 靠上面 html,body 嘅 touch-action:manipulation；呢度留返做多一重保險。 */
 document.querySelectorAll(".lotus").forEach(el=>{
   el.addEventListener("dblclick", e=>{ e.preventDefault(); e.stopPropagation(); });
 });
